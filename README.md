@@ -16,7 +16,7 @@ $ brew install clojure
 
 * Start a Clojure REPL in the day-of-datomic-cloud directory::
 ```
-$ cljs
+$ clj
 ```
 
 Work through some of the tutorials in the tutorial directory,
