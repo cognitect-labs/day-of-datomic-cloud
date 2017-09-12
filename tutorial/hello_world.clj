@@ -1,0 +1,74 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require [datomic.client.api.alpha :as d])
+
+;; Define the configuration for your client:
+(def cfg {:server-type :cloud
+          :region "<your AWS Region>" ;; e.g. us-east-1
+          :system "<your system name>"
+          :query-group "<your system name>"
+          :endpoint "http://entry.<system-name>.<region>.datomic.net:8182/"
+          :proxy-port <local-port for SSH tunnel to bastion>})
+
+;; Create a client:
+(def client (d/client cfg))
+
+;; Create a new database:
+(d/create-database client {:db-name "movies"})
+
+;; Connect to your new database:
+(def conn (d/connect client {:db-name "movies"}))
+
+;; Define a small schema for a movie database:
+(def movie-schema [{:db/ident :movie/title
+                    :db/valueType :db.type/string
+                    :db/cardinality :db.cardinality/one
+                    :db/doc "The title of the movie"}
+
+                   {:db/ident :movie/genre
+                    :db/valueType :db.type/string
+                    :db/cardinality :db.cardinality/one
+                    :db/doc "The genre of the movie"}
+
+                   {:db/ident :movie/release-year
+                    :db/valueType :db.type/long
+                    :db/cardinality :db.cardinality/one
+                    :db/doc "The year the movie was released in theaters"}])
+
+;; Now transact the schema:
+(d/transact conn {:tx-data movie-schema})
+
+
+;; Define some movies to add to the database:
+(def first-movies [{:movie/title "The Goonies"
+                    :movie/genre "action/adventure"
+                    :movie/release-year 1985}
+                   {:movie/title "Commando"
+                    :movie/genre "action/adventure"
+                    :movie/release-year 1985}
+                   {:movie/title "Repo Man"
+                    :movie/genre "punk dystopia"
+                    :movie/release-year 1984}])
+
+;; Now transact the movies:
+(d/transact conn {:tx-data first-movies})
+
+;; Get the current value of the database:
+(def db (d/db conn))
+
+;; Create a query for all movie titles:
+(def all-titles-q '[:find ?movie-title
+                    :where [_ :movie/title ?movie-title]])
+
+;; Execute the query with the value of the database:
+(d/q conn {:query all-titles-q :args [db]})
+
+;; Delete the movies database when finished
+(d/delete-database client {:db-name "movies"})
+
