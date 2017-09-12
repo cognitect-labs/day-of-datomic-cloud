@@ -5,7 +5,19 @@ for learning [Datomic Cloud](http://datomic.com) at a Clojure REPL.
 
 ## Getting Started
 
-[Create a Datomic Cloud System](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/getting-started.html).
+* Install Clojure:
+```
+$ brew install clojure
+```
+
+* [Create a Datomic Cloud System](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/getting-started.html).
+
+* Clone this repo locally
+
+* Start a Clojure REPL in the day-of-datomic-cloud directory::
+```
+$ cljs
+```
 
 Work through some of the tutorials in the tutorial directory,
 evaluating each form at the REPL. You might start with:
