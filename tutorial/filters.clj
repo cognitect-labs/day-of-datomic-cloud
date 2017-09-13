@@ -6,26 +6,11 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require [clojure.pprint :as pp]
-         [datomic.client.api.alpha :as d])
+(require '[clojure.pprint :as pp]
+         '[datomic.client.api.alpha :as d]
+         '[datomic.samples.repl :as repl])
 
-;; Define the configuration for your client:
-
-(def cfg {:server-type :cloud
-          :region "<your AWS Region>" ;; e.g. us-east-1
-          :system "<your system name>"
-          :query-group "<your system name>"
-          :endpoint "http://entry.<system-name>.<region>.datomic.net:8182/"
-          :proxy-port <local-port for SSH tunnel to bastion>})
-
-;; Create a client:
-(def client (d/client cfg))
-
-;; Create a new database:
-(d/create-database client {:db-name "rules-test3"})
-
-;; Connect to your new database:
-(def conn (d/connect client {:db-name "rules-test3"}))
+(def conn (repl/scratch-db-conn "config.edn"))
 
 (def txes
   [[{:db/id "item/id"
@@ -77,6 +62,12 @@
 (def since-2014 (d/since db #inst "2014-01-01"))
 (def history (d/history db))
 
+;; print db as a table
+(->> (d/datoms history {:index :eavt})
+     seq
+     (sort repl/tx-part-e-a-added)
+     (repl/datom-table history))
+
 (def error-txes (set (d/q '[:find ?e
                             :where [?e :tx/error]]
                           db)))
@@ -122,3 +113,4 @@
      (sort-by first)
      pp/pprint)
 
+(repl/delete-scratch-dbs "config.edn")
