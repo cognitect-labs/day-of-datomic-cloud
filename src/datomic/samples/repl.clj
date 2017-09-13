@@ -14,6 +14,8 @@
   (:import java.util.Random
            (java.util UUID)))
 
+(def resource io/resource)
+
 (def scratch-db-prefix "day-of-datomic-cloud-scratch-")
 
 (defn scratch-db-conn
@@ -157,11 +159,15 @@
   "Make transaction data for example users, possibly with upvotes"
   [stories email-prefix n]
   (mapcat
-   (fn [n]
-     (let [upvotes (map (fn [story] [:db/add "new-user" :user/upVotes story])
-                        (choose-some stories))]
-       (conj upvotes {:user/email (str email-prefix "-" n "@example.com")})))
-   (range n)))
+    (fn [n]
+      (let [user-id (str "new-user-" (UUID/randomUUID))
+            upvotes (map (fn [story] [:db/add user-id :user/upVotes story])
+                         (choose-some stories))]
+        (conj
+          upvotes
+          {:db/id user-id
+           :user/email (str email-prefix "-" n "@example.com")})))
+    (range n)))
 
 (defn trunc
   "Return a string rep of x, shortened to n chars or less"
