@@ -94,8 +94,7 @@
        [?a :db/valueType ?vt]]
      db)
 
-
-
+(repl/delete-scratch-dbs "config.edn")
 
 
 
