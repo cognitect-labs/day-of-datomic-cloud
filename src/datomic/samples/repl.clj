@@ -14,19 +14,23 @@
   (:import java.util.Random
            (java.util UUID)))
 
+(def scratch-db-prefix "day-of-datomic-cloud-scratch-")
+
 (defn scratch-db-conn
   "Create a connection to a scratch database"
-  []
-  (let [client (d/client datomic-client-config)
-        db-name (str scratch-db-prefix (UUID/randomUUID))]
-    (d/delete-database client {:db-name db-name})
-    (d/create-database client {:db-name db-name})
-    (d/connect client {:db-name db-name})))
+  [cfg-file]
+  (let [cfg (read-string (slurp cfg-file))
+       client (d/client cfg)
+       db-name (str scratch-db-prefix (UUID/randomUUID))]
+   (d/delete-database client {:db-name db-name})
+   (d/create-database client {:db-name db-name})
+   (d/connect client {:db-name db-name})))
 
 (defn delete-scratch-dbs
-  []
-  "Deletes all DBs with the prefix \"dod-scratch-\""
-  (let [client (d/client datomic-client-config)
+  [cfg-file]
+  "Deletes all DBs with the prefix \"day-of-datomic-cloud-scratch-\""
+  (let [cfg (read-string (slurp cfg-file))
+        client (d/client cfg)
         db-names (d/list-databases client {})]
     (doseq [db-name db-names
             :when (.startsWith db-name scratch-db-prefix)]
@@ -174,8 +178,8 @@
    (compare
     [_ x y]
     (cond
-     (< (:tx x) (:tx y)) -1
-     (> (:tx x) (:tx y)) 1
+     (< (:t x) (:t y)) -1
+     (> (:t x) (:t y)) 1
      (< (:e x) (:e y)) -1
      (> (:e x) (:e y)) 1
      (< (:a x) (:a y)) -1
@@ -188,11 +192,10 @@
   [db datoms]
   (->> datoms
        (map
-        (fn [{:keys [e a v tx added]}]
+        (fn [{:keys [e a v t added]}]
           {"e" (format "0x%016x" e)
            "a" (:db/ident (d/pull db {:selector '[:db/ident] :eid a}))
            "v" (trunc v 24)
-           "tx" (format "0x%x" tx)
+           "tx" (format "0x%x" t)
            "added" added}))
        (pp/print-table ["e" "a" "v" "tx" "added"])))
-
