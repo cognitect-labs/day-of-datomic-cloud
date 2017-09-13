@@ -6,17 +6,12 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require [datomic.client.api.alpha :as d])
+(require '[datomic.client.api.alpha :as d])
 
 ;; Define the configuration for your client:
-(def cfg {:server-type :cloud
-          :region "<your AWS Region>" ;; e.g. us-east-1
-          :system "<your system name>"
-          :query-group "<your system name>"
-          :endpoint "http://entry.<system-name>.<region>.datomic.net:8182/"
-          :proxy-port <local-port for SSH tunnel to bastion>})
+(def cfg (read-string (slurp "config.edn")))
 
-;; Create a client:
+  ;; Create a client:
 (def client (d/client cfg))
 
 ;; Create a new database:
@@ -44,7 +39,6 @@
 ;; Now transact the schema:
 (d/transact conn {:tx-data movie-schema})
 
-
 ;; Define some movies to add to the database:
 (def first-movies [{:movie/title "The Goonies"
                     :movie/genre "action/adventure"
@@ -67,8 +61,9 @@
                     :where [_ :movie/title ?movie-title]])
 
 ;; Execute the query with the value of the database:
-(d/q conn {:query all-titles-q :args [db]})
+(d/q all-titles-q db)
 
 ;; Delete the movies database when finished
 (d/delete-database client {:db-name "movies"})
+
 
