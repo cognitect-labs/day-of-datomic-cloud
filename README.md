@@ -14,7 +14,11 @@ $ brew install clojure
 
 * Clone this repo locally
 
-* Start a Clojure REPL in the day-of-datomic-cloud directory::
+* Copy the config.edn.example file and edit it, providing your Datomic Cloud connection [configuration information](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/connecting.html#creating-database).
+
+* Make sure you are running a [SOCKS Proxy](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/configuring-access.html#socks-proxy) to your Datomic Cloud Bastion.
+
+* Start a Clojure REPL in the day-of-datomic-cloud directory:
 ```
 $ clj
 ```
