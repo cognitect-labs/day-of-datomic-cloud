@@ -1,0 +1,107 @@
+;; inspired by http://docs.neo4j.org/chunked/stable/cypher-cookbook-hyperedges.html
+[{:db/ident :group/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :user/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :role/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :roleInGroup/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :groups
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db.install/_attribute :db.part/db
+  :db/doc "A user's reference to a group"}
+
+ {:db/ident :hasRoleInGroups
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db.install/_attribute :db.part/db
+  :db/doc "A user's reference to a role in a group"}
+
+ {:db/ident :hasGroups
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db.install/_attribute :db.part/db
+  :db/doc "A role-in-group's reference to a group"}
+
+ {:db/ident :hasRoles
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db.install/_attribute :db.part/db
+  :db/doc "A role-in-group's reference to a role"}
+
+ {:db/ident :canHaves
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db.install/_attribute :db.part/db
+  :db/doc "A group's reference to a role"}]
+
+
+;; nodes
+[{:user/name "User1"}
+ {:user/name "User2"}
+ {:role/name "Role1"}
+ {:role/name "Role2"}
+ {:role/name "Role3"}
+ {:role/name "Role4"}
+ {:role/name "Role5"}
+ {:role/name "Role6"}
+ {:group/name "Group1"}
+ {:group/name "Group2"}
+ {:group/name "Group3"}
+ {:roleInGroup/name "U2G2R34"}
+ {:roleInGroup/name "U1G2R23"}
+ {:roleInGroup/name "U1G3R34"}
+ {:roleInGroup/name "U2G3R56"}
+ {:roleInGroup/name "U2G1R25"}
+ {:roleInGroup/name "U1G1R12"}]
+
+;; edges
+[{:db/id [:roleInGroup/name "U2G2R34"]
+  :_hasRoleInGroups [:user/name "User2"]
+  :hasGroups #{[:group/name "Group2"]}
+  :hasRoles #{[:role/name "Role3"]
+              [:role/name "Role4"]}}
+ {:db/id [:roleInGroup/name "U1G2R23"]
+  :_hasRoleInGroups [:user/name "User1"]
+  :hasGroups #{[:group/name "Group2"]}
+  :hasRoles #{[:role/name "Role2"]
+              [:role/name "Role3"]}}
+ {:db/id [:roleInGroup/name "U1G3R34"]
+  :_hasRoleInGroups [:user/name "User1"]
+  :hasGroups #{[:group/name "Group3"]}
+  :hasRoles #{[:role/name "Role3"]
+              [:role/name "Role4"]}}
+ {:db/id [:roleInGroup/name "U2G3R56"]
+  :_hasRoleInGroups [:user/name "User2"]
+  :hasGroups #{[:group/name "Group3"]}
+  :hasRoles #{[:role/name "Role5"]
+              [:role/name "Role6"]}}
+ {:db/id [:roleInGroup/name "U2G1R25"]
+  :_hasRoleInGroups [:user/name "User2"]
+  :hasGroups #{[:group/name "Group1"]}
+  :hasRoles #{[:role/name "Role2"]
+              [:role/name "Role5"]}}
+ {:db/id [:roleInGroup/name "U1G1R12"]
+  :_hasRoleInGroups [:user/name "User1"]
+  :hasGroups #{[:group/name "Group1"]}
+  :hasRoles #{[:role/name "Role1"]
+              [:role/name "Role2"]}}]
+

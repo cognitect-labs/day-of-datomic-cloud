@@ -1,0 +1,62 @@
+;; stories
+[{:db/ident :story/title
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :story/url
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity}
+ {:db/ident :story/slug
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}]
+
+;; comments
+[{:db/ident :comments
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/isComponent true}
+ {:db/ident :comment/body
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :comment/author
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one}]
+
+;; users
+[{:db/ident :user/firstName
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :user/lastName
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :user/email
+  :db/unique :db.unique/identity
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :user/passwordHash
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :user/upVotes
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many}
+
+ ;; publish time
+ {:db/ident :publish/at
+  :db/valueType :db.type/instant
+  :db/cardinality :db.cardinality/one}]
+
+;; stories
+[{:story/title "Teach Yourself Programming in Ten Years"
+  :story/url "http://norvig.com/21-days.html"}
+ {:story/title "Clojure Rationale"
+  :story/url "http://clojure.org/rationale"}
+ {:story/title "Beating the Averages"
+  :story/url "http://www.paulgraham.com/avg.html"}]
+
+;; users
+[{:user/firstName "Stu"
+  :user/lastName "Halloway"
+  :user/email "stuarthalloway@datomic.com"}
+ {:user/firstName "Ed"
+  :user/lastName "Itor"
+  :user/email "editor@example.com"}]

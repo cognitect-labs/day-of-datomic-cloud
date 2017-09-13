@@ -1,0 +1,77 @@
+{:day-of-datomic/provenance
+ {:requires [:day-of-datomic/social-news]
+  :txes [[{:db/ident :source/user
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db.install/_attribute :db.part/db}
+          {:db/ident :source/confidence
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Confidence in the source of this information, from 0 to 100"
+           :db.install/_attribute :db.part/db}]]}
+ :day-of-datomic/social-news
+ {:txes 
+  [[ ;; stories
+    {:db/ident :story/title
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/ident :story/url
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db/unique :db.unique/identity
+     :db.install/_attribute :db.part/db}
+    {:db/ident :story/slug
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}]
+  
+  ;; comments
+   [{:db/ident :comments
+     :db/valueType :db.type/ref
+     :db/cardinality :db.cardinality/many
+     :db/isComponent true
+     :db.install/_attribute :db.part/db}
+    {:db/ident :comment/body
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/ident :comment/author
+     :db/valueType :db.type/ref
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}]
+  
+  ;; users
+   [{:db/ident :user/firstName
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/ident :user/lastName
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/ident :user/email
+     :db/unique :db.unique/identity
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/ident :user/upVotes
+     :db/valueType :db.type/ref
+     :db/cardinality :db.cardinality/many
+     :db.install/_attribute :db.part/db}]
+  
+  ;; stories
+   [{:story/title "Teach Yourself Programming in Ten Years"
+     :story/url "http://norvig.com/21-days.html"}
+    {:story/title "Clojure Rationale"
+     :story/url "http://clojure.org/rationale"}
+    {:story/title "Beating the Averages"
+     :story/url "http://www.paulgraham.com/avg.html"}]
+  
+  ;; users
+   [{:user/firstName "Stu"
+     :user/lastName "Halloway"
+     :user/email "stuarthalloway@datomic.com"}
+    {:user/firstName "Ed"
+     :user/lastName "Itor"
+     :user/email "editor@example.com"}]]}}

@@ -1,0 +1,6 @@
+{:server-type :cloud
+ :region "<your AWS Region>" ;; e.g. us-east-1
+ :system "<your system name>"
+ :query-group "<your system name>"
+ :endpoint "http://entry.<system-name>.<region>.datomic.net:8182/"
+ :proxy-port <local-port for SSH tunnel to bastion>}
