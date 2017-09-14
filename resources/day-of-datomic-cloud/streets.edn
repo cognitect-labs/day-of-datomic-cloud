@@ -8,7 +8,8 @@
   :db/valueType     :db.type/string
   :db/cardinality   :db.cardinality/one
   :db.install/_attribute :db.part/db}
- {:db/txInstant #inst "1970"}]
+ {:db/id "datomic.tx"
+  :db/txInstant #inst "1970"}]
 
 ;; Some people and their streets
 [{:person/name "John"
@@ -17,21 +18,25 @@
   :person/street "1st"}
  {:person/name "Mary"
   :person/street "Elm"}
- {:db/txInstant #inst "1980"}]
+ {:db/id "datomic.tx"
+  :db/txInstant #inst "1980"}]
 
 ;; Mary and Joe both moved at the same time
 [{:db/id [:person/name "Mary"]
   :person/street "2nd"}
  {:db/id [:person/name "Joe"]
   :person/street "Broadway"}
- {:db/txInstant #inst "1983"}]
+ {:db/id "datomic.tx"
+  :db/txInstant #inst "1983"}]
 
 ;; John moved to Ash st.
 [{:db/id [:person/name "John"]
   :person/street "Ash"}
- {:db/txInstant #inst "1986"}]
+ {:db/id "datomic.tx"
+  :db/txInstant #inst "1986"}]
 
 ;; John moves a lot
 [{:db/id [:person/name "John"]
   :person/street "3rd"}
- {:db/txInstant #inst "1989"}]
+ {:db/id "datomic.tx"
+  :db/txInstant #inst "1989"}]
