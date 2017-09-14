@@ -11,7 +11,7 @@
 ;; Define the configuration for your client:
 (def cfg (read-string (slurp "config.edn")))
 
-  ;; Create a client:
+;; Create a client:
 (def client (d/client cfg))
 
 ;; Create a new database:

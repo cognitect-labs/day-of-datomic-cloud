@@ -28,8 +28,8 @@
 (def upvote-all-stories
   "Transaction data for new-user-id to upvote all stories"
   (mapv
-   (fn [story] [:db/add new-user-id :user/upVotes story])
-   all-stories))
+    (fn [story] [:db/add new-user-id :user/upVotes story])
+    all-stories))
 
 (def new-user
   "Transaction data for a new user"
@@ -101,7 +101,7 @@
 ;; how many users have upvoted something?
 (d/q '[:find (count ?e)
        :where [?e :user/email]
-              [?e :user/upVotes]]
+       [?e :user/upVotes]]
      (d/db conn))
 
 ;; Datomic does not need a left join to keep entities missing

@@ -22,11 +22,11 @@
   "Create a connection to a scratch database"
   [cfg-file]
   (let [cfg (read-string (slurp cfg-file))
-       client (d/client cfg)
-       db-name (str scratch-db-prefix (UUID/randomUUID))]
-   (d/delete-database client {:db-name db-name})
-   (d/create-database client {:db-name db-name})
-   (d/connect client {:db-name db-name})))
+        client (d/client cfg)
+        db-name (str scratch-db-prefix (UUID/randomUUID))]
+    (d/delete-database client {:db-name db-name})
+    (d/create-database client {:db-name db-name})
+    (d/connect client {:db-name db-name})))
 
 (defn delete-scratch-dbs
   [cfg-file]
@@ -89,22 +89,22 @@
    an exception occurred. Throws if an exception did *not* occur."
   [& forms]
   `(try
-    ~@forms
-    (throw (ex-info "Expected exception" {:forms '~forms}))
-    (catch Throwable t#
-      (println "Got expected exception:\n\t" (.getMessage t#)))))
+     ~@forms
+     (throw (ex-info "Expected exception" {:forms '~forms}))
+     (catch Throwable t#
+       (println "Got expected exception:\n\t" (.getMessage t#)))))
 
 (defn modes
   "Returns the set of modes for a collection."
   [coll]
   (->> (frequencies coll)
        (reduce
-        (fn [[modes ct] [k v]]
-          (cond
-           (< v ct)  [modes ct]
-           (= v ct)  [(conj modes k) ct]
-           (> v ct) [#{k} v]))
-        [#{} 2])
+         (fn [[modes ct] [k v]]
+           (cond
+             (< v ct)  [modes ct]
+             (= v ct)  [(conj modes k) ct]
+             (> v ct) [#{k} v]))
+         [#{} 2])
        first))
 
 (defn generate-some-comments
@@ -180,28 +180,28 @@
 (def tx-part-e-a-added
   "Sort datoms by tx, then e, then a, then added"
   (reify
-   java.util.Comparator
-   (compare
-    [_ x y]
-    (cond
-     (< (:t x) (:t y)) -1
-     (> (:t x) (:t y)) 1
-     (< (:e x) (:e y)) -1
-     (> (:e x) (:e y)) 1
-     (< (:a x) (:a y)) -1
-     (> (:a x) (:a y)) 1
-     (false? (:added x)) -1
-     :default 1))))
+    java.util.Comparator
+    (compare
+      [_ x y]
+      (cond
+        (< (:t x) (:t y)) -1
+        (> (:t x) (:t y)) 1
+        (< (:e x) (:e y)) -1
+        (> (:e x) (:e y)) 1
+        (< (:a x) (:a y)) -1
+        (> (:a x) (:a y)) 1
+        (false? (:added x)) -1
+        :default 1))))
 
 (defn datom-table
   "Print a collection of datoms in an org-mode compatible table."
   [db datoms]
   (->> datoms
        (map
-        (fn [{:keys [e a v t added]}]
-          {"e" (format "0x%016x" e)
-           "a" (:db/ident (d/pull db {:selector '[:db/ident] :eid a}))
-           "v" (trunc v 24)
-           "tx" (format "0x%x" t)
-           "added" added}))
+         (fn [{:keys [e a v t added]}]
+           {"e" (format "0x%016x" e)
+            "a" (:db/ident (d/pull db {:selector '[:db/ident] :eid a}))
+            "v" (trunc v 24)
+            "tx" (format "0x%x" t)
+            "added" added}))
        (pp/print-table ["e" "a" "v" "tx" "added"])))

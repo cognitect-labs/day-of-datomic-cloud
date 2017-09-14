@@ -29,13 +29,13 @@
 
 ;; find all groups and roles for a user
 (pp/pprint
- (d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
-        :in $ ?e
-        :where
-        [?e :hasRoleInGroups ?roleInGroup]
-        [?roleInGroup :hasGroups ?group]
-        [?roleInGroup :hasRoles ?role]]
-      db [:user/name "User2"]))
+  (d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
+         :in $ ?e
+         :where
+         [?e :hasRoleInGroups ?roleInGroup]
+         [?roleInGroup :hasGroups ?group]
+         [?roleInGroup :hasRoles ?role]]
+       db [:user/name "User2"]))
 
 (def rules '[[(user-roles-in-groups ?user ?role ?group)
               [?user :hasRoleInGroups ?roleInGroup]
@@ -44,16 +44,16 @@
 
 ;; find all groups and roles for a user, using a datalog rulea
 (pp/pprint
- (d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
-        :in $ % ?user
-        :where (user-roles-in-groups ?user ?role ?group)]
-      db rules [:user/name "User1"]))
+  (d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
+         :in $ % ?user
+         :where (user-roles-in-groups ?user ?role ?group)]
+       db rules [:user/name "User1"]))
 
 ;; find common groups based on shared roles, counting shared roles
 (d/q '[:find (pull ?group [:group/name]) (count ?role)
        :in $ % ?user1 ?user2
        :where (user-roles-in-groups ?user1 ?role ?group)
-              (user-roles-in-groups ?user2 ?role ?group)]
+       (user-roles-in-groups ?user2 ?role ?group)]
      db rules [:user/name "User1"] [:user/name "User2"])
 
 (repl/delete-scratch-dbs "config.edn")
