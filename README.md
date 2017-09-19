@@ -14,7 +14,7 @@ $ brew install clojure
 
 * Clone this repo locally
 
-* Copy the config.edn.example file and edit it, providing your Datomic Cloud connection [configuration information](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/connecting.html#creating-database).
+* Make a copy of the config.edn.example file and edit it, providing your Datomic Cloud connection [configuration information](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/connecting.html#creating-database).
 
 * Make sure you are running a [SOCKS Proxy](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/configuring-access.html#socks-proxy) to your Datomic Cloud Bastion.
 
@@ -27,6 +27,9 @@ Work through some of the tutorials in the tutorial directory,
 evaluating each form at the REPL. You might start with:
 
 * hello_world.clj
+* social_news.clj
+* provenance.clj
+* graph.clj
 * filters.clj
 
 ## Study the Samples
@@ -39,7 +42,7 @@ the helper functions in src/datomic/samples.
 For specific feedback on the tutorials, please create an
 [issue](https://github.com/cognitect-labs/day-of-datomic-cloud/issues).
 
-For questions about Datomic, try the [public discussion forum](http://54e4c71d2fd34f1db71a9666c66b175c.cognitect.com/).
+For questions about Datomic, try the [public discussion forum](http://forum.datomic.com/).
 
 ## License
 
