@@ -6,8 +6,8 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-;; The examples below parallel http://docs.datomic.com/pull.html
-;; sample data at https://github.com/Datomic/mbrainz-sample
+;; The examples below parallel http://docs.datomic.com/cloud/query/query-pull.html
+;; sample data at https://github.com/Datomic/mbrainz-importer
 
 ;; get connected
 (require '[datomic.client.api.alpha :as d])
