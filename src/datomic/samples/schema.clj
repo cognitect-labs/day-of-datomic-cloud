@@ -25,10 +25,10 @@
    which schema names are installed."
   [conn db schema-attr schema-name]
   (and (has-attribute? db schema-attr)
-       (-> (d/q conn {:query '[:find ?e
-                               :in $ ?sa ?sn
-                               :where [?e ?sa ?sn]]
-                      :args [db schema-attr schema-name]})
+       (-> (d/q {:query '[:find ?e
+                          :in $ ?sa ?sn
+                          :where [?e ?sa ?sn]]
+                 :args [db schema-attr schema-name]})
            seq
            boolean)))
 
