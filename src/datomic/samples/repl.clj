@@ -110,17 +110,17 @@
 (defn generate-some-comments
   "Generates transaction data for some comments"
   [conn db n]
-  (let [story-ids (->> (d/q conn {:query '[:find ?e
-                                           :where [?e :story/url]]
-                                  :args [db]})
+  (let [story-ids (->> (d/q {:query '[:find ?e
+                                      :where [?e :story/url]]
+                             :args [db]})
                        (mapv first))
-        user-ids (->> (d/q conn {:query '[:find ?e
-                                          :where [?e :user/email]]
-                                 :args [db]})
+        user-ids (->> (d/q {:query '[:find ?e
+                                     :where [?e :user/email]]
+                            :args [db]})
                       (mapv first))
-        comment-ids (->> (d/q conn {:query '[:find ?e
-                                             :where [?e :comment/author]]
-                                    :args [db]})
+        comment-ids (->> (d/q {:query '[:find ?e
+                                        :where [?e :comment/author]]
+                               :args [db]})
                          (mapv first))
         choose1 (fn [n] (when (seq n) (gen/rand-nth n)))]
     (assert (seq story-ids))
@@ -136,13 +136,13 @@
 ;
 (defn setup-sample-db-1
   [conn]
-  (doseq [schema ["day-of-datomic/social-news.edn"
-                  "day-of-datomic/provenance.edn"]]
+  (doseq [schema ["day-of-datomic-cloud/social-news.edn"
+                  "day-of-datomic-cloud/provenance.edn"]]
     (->> (io/resource schema)
          (transact-all conn)))
-  (let [[[ed]] (seq (d/q conn {:query '[:find ?e
-                                        :where [?e :user/email "editor@example.com"]]
-                               :args [(d/db conn)]}))]
+  (let [[[ed]] (seq (d/q {:query '[:find ?e
+                                   :where [?e :user/email "editor@example.com"]]
+                          :args [(d/db conn)]}))]
     (d/transact conn {:tx-data [[:db/add ed :user/firstName "Edward"]]}))
   (binding [gen/*rnd* (Random. 42)]
     (dotimes [_ 4]
