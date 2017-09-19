@@ -1,7 +1,5 @@
-{:deps
- {
+{:deps {
   org.clojure/data.generators {:type :mvn :version "0.1.2"}
-  com.datomic/client {:type :mvn :version "0.8.32"}
-  com.datomic/client-impl-cloud {:type :mvn :version "0.8.35"}
-  }
- }
+  com.datomic/client {:type :mvn :version "0.8.34"}
+  com.datomic/client-impl-cloud {:type :mvn :version "0.8.35"}}
+ :paths ["src" "tutorial" "resources"]}
