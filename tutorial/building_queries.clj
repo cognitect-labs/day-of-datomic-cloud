@@ -26,41 +26,41 @@
 (def db (d/db conn))
 
 ;; find all the Stewart first names
-(flatten (d/q '[:find ?e
-                :in $ ?name
-                :where [?e :user/firstName ?name]]
-              db
-              "Stewart"))
+(d/q '[:find ?e
+       :in $ ?name
+       :where [?e :user/firstName ?name]]
+     db
+     "Stewart")
 
 ;; find all the Stewart or Stuart first names
-(flatten (d/q '[:find ?e
-                :in $ [?name ...]
-                :where [?e :user/firstName ?name]]
-              db
-              ["Stewart" "Stuart"]))
+(d/q '[:find ?e
+       :in $ [?name ...]
+       :where [?e :user/firstName ?name]]
+     db
+     ["Stewart" "Stuart"])
 
 ;; find all the Stewart/Stuart as either first name or last name
-(flatten (d/q '[:find ?e
-                :in $ [?name ...] [?attr ...]
-                :where [?e ?attr ?name]]
-              db
-              ["Stewart" "Stuart"]
-              [:user/firstName :user/lastName]))
+(d/q '[:find ?e
+       :in $ [?name ...] [?attr ...]
+       :where [?e ?attr ?name]]
+     db
+     ["Stewart" "Stuart"]
+     [:user/firstName :user/lastName])
 
 ;; find only the Smalley Stuarts
-(flatten (d/q '[:find ?e
-                :in $ ?fname ?lname
-                :where [?e :user/firstName ?fname]
-                [?e :user/lastName ?lname]]
-              db
-              "Stuart"
-              "Smalley"))
+(d/q '[:find ?e
+       :in $ ?fname ?lname
+       :where [?e :user/firstName ?fname]
+       [?e :user/lastName ?lname]]
+     db
+     "Stuart"
+     "Smalley")
 
 ;; same query as above, but with map form
-(flatten (d/q {:query '{:find [?e]
-                        :in [$ ?fname ?lname]
-                        :where [[?e :user/firstName ?fname]
-                                [?e :user/lastName ?lname]]}
-               :args [db "Stuart" "Smalley"]}))
+(d/q {:query '{:find [?e]
+               :in [$ ?fname ?lname]
+               :where [[?e :user/firstName ?fname]
+                       [?e :user/lastName ?lname]]}
+      :args [db "Stuart" "Smalley"]})
 
 (repl/delete-scratch-dbs "config.edn")

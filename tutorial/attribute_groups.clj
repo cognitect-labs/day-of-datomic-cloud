@@ -15,14 +15,14 @@
 (def db (d/db conn))
 
 ;; find all attributes in the story namespace
-(flatten (d/q '[:find ?e
-                :in $
-                :where
-                [?e :db/valueType]
-                [?e :db/ident ?a]
-                [(namespace ?a) ?ns]
-                [(= ?ns "story")]]
-              db))
+(d/q '[:find ?e
+       :in $
+       :where
+       [?e :db/valueType]
+       [?e :db/ident ?a]
+       [(namespace ?a) ?ns]
+       [(= ?ns "story")]]
+     db)
 
 ;; create a reusable rule
 (def rules
@@ -33,19 +33,19 @@
      [(= ?ns1 ?ns2)]]])
 
 ;; find all attributes in story namespace, using the rule
-(flatten (d/q '[:find ?e
-                :in $ %
-                :where
-                (attr-in-namespace ?e "story")]
-              db rules))
+(d/q '[:find ?e
+       :in $ %
+       :where
+       (attr-in-namespace ?e "story")]
+     db rules)
 
 ;; find all entities possessing *any* story attribute
-(flatten (d/q '[:find ?e
-                :in $ %
-                :where
-                (attr-in-namespace ?a "story")
-                [?e ?a]]
-              db rules))
+(d/q '[:find ?e
+       :in $ %
+       :where
+       (attr-in-namespace ?a "story")
+       [?e ?a]]
+     db rules)
 
 (repl/delete-scratch-dbs "config.edn")
 

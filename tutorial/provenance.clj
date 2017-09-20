@@ -7,7 +7,8 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api.alpha :as d]
-         '[datomic.samples.repl :as repl])
+         '[datomic.samples.repl :as repl]
+         '[clojure.pprint :as pp])
 
 (def conn (repl/scratch-db-conn "config.edn"))
 
@@ -61,7 +62,7 @@
           (d/history (d/db conn))
           story)
      (sort-by #(nth % 3))
-     pprint)
+     pp/pprint)
 
 ;; what is the entire history of entity e?
 (->> (d/q '[:find ?aname ?v ?tx ?inst ?added
@@ -74,6 +75,6 @@
           story)
      seq
      (sort-by #(nth % 2))
-     pprint)
+     pp/pprint)
 
 (repl/delete-scratch-dbs "config.edn")
