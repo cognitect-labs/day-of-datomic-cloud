@@ -2,55 +2,46 @@
 [{:db/ident :group/name
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/identity
-  :db.install/_attribute :db.part/db}
+  :db/unique :db.unique/identity}
 
  {:db/ident :user/name
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/identity
-  :db.install/_attribute :db.part/db}
+  :db/unique :db.unique/identity}
 
  {:db/ident :role/name
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/identity
-  :db.install/_attribute :db.part/db}
+  :db/unique :db.unique/identity}
 
  {:db/ident :roleInGroup/name
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/identity
-  :db.install/_attribute :db.part/db}
+  :db/unique :db.unique/identity}
 
  {:db/ident :groups
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
-  :db.install/_attribute :db.part/db
   :db/doc "A user's reference to a group"}
 
  {:db/ident :hasRoleInGroups
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
-  :db.install/_attribute :db.part/db
   :db/doc "A user's reference to a role in a group"}
 
  {:db/ident :hasGroups
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
-  :db.install/_attribute :db.part/db
   :db/doc "A role-in-group's reference to a group"}
 
  {:db/ident :hasRoles
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
-  :db.install/_attribute :db.part/db
   :db/doc "A role-in-group's reference to a role"}
 
  {:db/ident :canHaves
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
-  :db.install/_attribute :db.part/db
   :db/doc "A group's reference to a role"}]
 
 

@@ -2,12 +2,10 @@
 [{:db/ident         :person/name
   :db/unique        :db.unique/identity
   :db/valueType     :db.type/string
-  :db/cardinality   :db.cardinality/one
-  :db.install/_attribute :db.part/db}
+  :db/cardinality   :db.cardinality/one}
  {:db/ident         :person/street
   :db/valueType     :db.type/string
-  :db/cardinality   :db.cardinality/one
-  :db.install/_attribute :db.part/db}
+  :db/cardinality   :db.cardinality/one}
  {:db/id "datomic.tx"
   :db/txInstant #inst "1970"}]
 
