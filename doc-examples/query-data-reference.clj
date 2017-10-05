@@ -1,0 +1,197 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+;; The examples below parallel http://docs.datomic.com/cloud/query/query-data-reference.html
+;; sample data at https://github.com/Datomic/mbrainz-importer
+
+(require '[datomic.client.api.alpha :as d])
+
+;; Define the configuration for your client:
+(def cfg (read-string (slurp "config.edn")))
+
+(def client (d/client cfg))
+(def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
+(def db (d/db conn))
+
+;; correct: "The Beatles" is a data source
+(def query '[:find ?e
+             :in $ ?name
+             :where [?e :artist/name ?name]])
+(d/q query db "The Beatles")
+(d/q query db "The Who")
+
+(def query '[:find ?e
+             :in $ ?artist-name
+             :where [?e :artist/name ?artist-name]])
+
+
+;; NEVER DO THIS: string interpolation
+(def query (format "[:find ?e
+                     :where [?e :artist/name \"%s\"]]" "The Beatles"))
+(d/q query db)
+
+(d/q {:query '[:find ?e
+               :in $ ?name
+               :where [?e :artist/name ?name]]
+      :args [db "The Beatles"]})
+
+(d/q {:query '[:find ?e
+               :where [?e :artist/name "The Beatles"]]
+      :args [db]})
+
+(d/q {:query '[:find (pull ?e [:artist/startYear :artist/endYear])
+               :where [?e :artist/name "The Beatles"]]
+      :args [db]})
+
+(d/q {:query '[:find ?name ?duration
+               :where
+               [?e :artist/name "The Beatles"]
+               [?track :track/artists ?e]
+               [?track :track/name ?name]
+               [?track :track/duration ?duration]]
+      :args [db]})
+
+(d/q {:query '[:find (pull ?e [:artist/startYear :artist/endYear])
+               :in $ ?name
+               :where [?e :artist/name ?name]]
+      :args [db "The Beatles"]})
+
+(d/q {:query '[:find (pull ?e pattern)
+               :in $ ?name pattern
+               :where [?e :artist/name ?name]]
+      :args [db "The Beatles" [:artist/startYear :artist/endYear]]})
+
+
+(d/q {:query '[:find ?e ?tx ?op
+               :in $mbrainz
+               :where [$mbrainz ?e :artist/name "The Beatles" ?tx ?op]]
+      :args [db]})
+
+(d/q {:query '[:find (sample 1 ?name)
+               :where [_ :artist/name ?name]]
+      :args [db]})
+
+(d/q '[:find ?name
+       :where [_ :artist/name ?name]
+       [(<= "Q" ?name)]
+       [(< ?name "R")]]
+     db)
+
+(d/q '[:find ?name
+       :where [_ :artist/name ?name]
+       [(.contains ^String ?name "woo")]]
+     db)
+
+;; slower than using < <=
+(d/q {:query '[:find ?name
+               :where [_ :artist/name ?name]
+               [(clojure.string/starts-with? ?name "Q")]]
+      :args [db]})
+
+(d/q {:query '[:find ?track-name ?minutes
+               :in $ ?artist-name
+               :where [?artist :artist/name ?artist-name]
+               [?track :track/artists ?artist]
+               [?track :track/duration ?millis]
+               [(quot ?millis 60000) ?minutes]
+               [?track :track/name ?track-name]]
+      :args [db "John Lennon"]})
+
+
+(d/q {:query '[:find (count ?eid)
+               :where [?eid :artist/name]
+               (not [?eid :artist/country :country/CA])]
+      :args [db]})
+
+;; failure to bind
+(d/q '[:find (count ?eid)
+       :where (not [?eid :artist/country :country/CA])]
+     db)
+
+
+(d/q {:query '[:find (count ?artist)
+               :where [?artist :artist/name]
+               (not-join [?artist]
+                         [?release :release/artists ?artist]
+                         [?release :release/year 1970])]
+      :args [db]})
+
+(d/q {:query '[:find (count ?r)
+               :where [?r :release/name "Live at Carnegie Hall"]
+               (not-join [?r]
+                         [?r :release/artists ?a]
+                         [?a :artist/name "Bill Withers"])]
+      :args [db]})
+
+(d/q '[:find (count ?medium)
+       :where (or [?medium :medium/format :medium.format/vinyl7]
+                  [?medium :medium/format :medium.format/vinyl10]
+                  [?medium :medium/format :medium.format/vinyl12]
+                  [?medium :medium/format :medium.format/vinyl])]
+     db)
+
+(d/q {:query '[:find (count ?artist)
+               :where (or [?artist :artist/type :artist.type/group]
+                          (and [?artist :artist/type :artist.type/person]
+                               [?artist :artist/gender :artist.gender/female]))]
+      :args [db]})
+
+(d/q {:query '[:find (count ?release)
+               :where [?release :release/name]
+               (or-join [?release]
+                        (and [?release :release/artists ?artist]
+                             [?artist :artist/country :country/CA])
+                        [?release :release/year 1970])]
+      :args [db]})
+
+(def rules
+  '[[(track-info ?artist ?name ?duration)
+     [?track :track/artists ?artist]
+     [?track :track/name ?name]
+     [?track :track/duration ?duration]]])
+
+(d/q '[:find ?name ?duration
+       :in $ % ?aname
+       :where [?artist :artist/name ?aname]
+       (track-info ?artist ?name ?duration)]
+     db rules "The Beatles")
+
+(def rules
+  '[[(benelux ?artist)
+     [?artist :artist/country :country/BE]]
+    [(benelux ?artist)
+     [?artist :artist/country :country/NL]]
+    [(benelux ?artist)
+     [?artist :artist/country :country/LU]]])
+
+(d/q '[:find ?name
+       :in $ %
+       :where
+       (benelux ?artist)
+       [?artist :artist/name ?name]]
+     db rules)
+
+(def rules
+  '[[(track-info [?artist] ?name ?duration)
+     [?track :track/artists ?artist]
+     [?track :track/name ?name]
+     [?track :track/duration ?duration]]])
+
+(d/q '[:find ?artist ?name ?duration
+       :in $ %
+       :where (track-info ?artist ?name ?duration)]
+     db rules)
+
+(d/q '[:find ?name ?duration
+       :in $mbrainz $artists %
+       :where [$artists ?aname]
+       [$mbrainz ?artist :artist/name ?aname]
+       ($mbrainz track-info ?artist ?name ?duration)]
+     db [["The Beatles"]] rules)
+
+
