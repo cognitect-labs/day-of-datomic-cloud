@@ -3,4 +3,5 @@
  :system "<your system name>"
  :query-group "<your system name>"
  :endpoint "http://entry.<system-name>.<region>.datomic.net:8182/"
+;; :creds-profile "<AWS Profile Name>" ;; Optional
  :proxy-port <local-port for SSH tunnel to bastion>}
