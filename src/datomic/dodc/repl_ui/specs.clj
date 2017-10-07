@@ -5,3 +5,7 @@
 (s/def ::schema-by-ns (s/map-of string? (s/coll-of ::attribute)))
 
 (s/def ::table (s/tuple (s/coll-of keyword?) (s/coll-of (s/map-of keyword? any?))))
+
+(s/def ::rectangle (s/and (s/coll-of vector?)
+                          (fn [colls]
+                            (apply = (map count colls)))))

@@ -5,7 +5,10 @@
    [datomic.dodc.repl-ui.specs :as specs]
    [seesaw.core :as ss]
    [seesaw.font :as font]
-   [seesaw.tree :as tree]))
+   [seesaw.tree :as tree])
+  (:import [javax.swing JTable]))
+
+(set! *warn-on-reflection* true)
 
 (defonce frame
   (delay (-> (ss/frame :title "Day of Datomic")
@@ -89,20 +92,42 @@
   [label]
   (ss/config! @frame :content (ss/label label)))
 
+(def font-base-ref
+  (atom 24))
+
+(defn font-size
+  []
+  @font-base-ref)
+
+(defn cell-height
+  []
+  (* @font-base-ref 1.2))
+
+(defn table*
+  [& args]
+  (doto ^JTable (apply ss/table args)
+    (.setRowHeight (cell-height))))
+
 (def renderers-ref
   (atom
    [[::specs/table
      (fn [[titles content]]
-       (ss/scrollable (ss/table :model [:columns titles
-                                        :rows (take 1000 content)]
-                                ;; :font (font :size 24)
-                                :show-grid? true)))]
+       (ss/scrollable (table* :model [:columns titles
+                                      :rows (take 1000 content)]
+                              :font (font :size (font-size))
+                              :show-grid? true)))]
     [::specs/schema-by-ns
      (fn [data]
        (ss/scrollable (ss/tree :model (schema-tree-model data)
-                               :row-height 28
+                               :row-height (cell-height)
                                :renderer schema-tree-render
-                               :font (font :size 24))))]]))
+                               :font (font :size (font-size)))))]
+    [::specs/rectangle
+     (fn [data]
+       (ss/scrollable (table* :model [:columns (map str (range (count (first data))))
+                                      :rows (take 1000 data)]
+                              :font (font :size (font-size))
+                              :show-grid? true?)))]]))
 
 (defn render
   [x]
@@ -115,6 +140,11 @@
    @renderers-ref))
 
 (defn render-and-print
+  "REPL printer that will render eval results into a Swing window,
+if they match a spec in renderers-ref. Use with e.g.
+
+   (main/repl :print ui/render-and-print)
+"
   [x]
   (render x)
   (prn x))
