@@ -1,6 +1,8 @@
 (ns datomic.dodc.repl-ui
   (:require
+   [clojure.spec.alpha :as s]
    [datomic.client.api.alpha :as d]
+   [datomic.dodc.repl-ui.specs :as specs]
    [seesaw.core :as ss]
    [seesaw.font :as font]
    [seesaw.tree :as tree]))
@@ -36,8 +38,6 @@
   [k]
   (map (fn [m] [(k m) (dissoc m k)])))
 
-;; ids or ids+idents instead of idents
-;; 
 (defn schema-by-ns
   [db]
   (->> (eduction
@@ -83,8 +83,39 @@
 
 (defn schema-tree-model
   [x]
-  (tree/simple-tree-model coll? x))
+  (tree/simple-tree-model schema-tree-branch? schema-tree-children (seq x)))
 
 (defn label!
   [label]
   (ss/config! @frame :content (ss/label label)))
+
+(def renderers-ref
+  (atom
+   [[::specs/table
+     (fn [[titles content]]
+       (ss/scrollable (ss/table :model [:columns titles
+                                        :rows (take 1000 content)]
+                                ;; :font (font :size 24)
+                                :show-grid? true)))]
+    [::specs/schema-by-ns
+     (fn [data]
+       (ss/scrollable (ss/tree :model (schema-tree-model data)
+                               :row-height 28
+                               :renderer schema-tree-render
+                               :font (font :size 24))))]]))
+
+(defn render
+  [x]
+  (reduce
+   (fn [_ [spec f]]
+     (when (s/valid? spec x)
+       (ss/config! @frame :content (f x))
+       (reduced spec)))
+   nil
+   @renderers-ref))
+
+(defn render-and-print
+  [x]
+  (render x)
+  (prn x))
+

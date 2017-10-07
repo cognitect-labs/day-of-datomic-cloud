@@ -1,6 +1,5 @@
 {:deps
  {org.clojure/data.generators {:mvn/version "0.1.2"}
-  com.datomic/client-cloud {:mvn/version "0.8.40"}
-  seesaw/seesaw {:mvn/version "1.4.5"}
-  org.clojure/core.async {:mvn/version "0.3.443"}}
+  com.datomic/client-cloud {:mvn/version "0.8.41"}
+  seesaw/seesaw {:mvn/version "1.4.5"}}
  :paths ["src" "tutorial" "doc-examples" "resources"]}
