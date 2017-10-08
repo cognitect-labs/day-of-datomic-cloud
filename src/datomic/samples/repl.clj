@@ -24,7 +24,6 @@
   (let [cfg (read-string (slurp cfg-file))
         client (d/client cfg)
         db-name (str scratch-db-prefix (UUID/randomUUID))]
-    (d/delete-database client {:db-name db-name})
     (d/create-database client {:db-name db-name})
     (d/connect client {:db-name db-name})))
 
