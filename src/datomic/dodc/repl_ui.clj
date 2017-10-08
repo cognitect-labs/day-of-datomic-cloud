@@ -1,12 +1,17 @@
 (ns datomic.dodc.repl-ui
   (:require
+   [clojure.data.csv :as csv]
+   [clojure.java.io :as io]
+   [clojure.java.shell :as sh]
    [clojure.spec.alpha :as s]
    [datomic.client.api.alpha :as d]
    [datomic.dodc.repl-ui.specs :as specs]
    [seesaw.core :as ss]
    [seesaw.font :as font]
    [seesaw.tree :as tree])
-  (:import [javax.swing JTable]))
+  (:import
+   [java.io File]
+   [javax.swing JTable]))
 
 (set! *warn-on-reflection* true)
 
@@ -106,7 +111,28 @@
 (defn table*
   [& args]
   (doto ^JTable (apply ss/table args)
-    (.setRowHeight (cell-height))))
+        (.setRowHeight (cell-height))))
+
+(defn- to-row
+  [ks row]
+  (if (map? row)
+    (map row ks)
+    row))
+
+(defn spreadsheet!
+  "Opens a temporary csv file containing ks and rows using
+whatever you have bound to 'open some.csv' Each row can be
+sequential in the same order as the keys, or a map keyed
+by the keys."
+  [ks rows]
+  (let [dir (io/file "temp")
+        _ (.mkdirs dir)
+        f (File/createTempFile "repl" ".csv" dir)]
+    (with-open [w (io/writer f)]
+      (csv/write-csv w [ks])
+      (csv/write-csv w (map #(to-row ks %) rows)))
+    (sh/sh "open" (.getAbsolutePath f))
+    f))
 
 (def renderers-ref
   (atom
