@@ -59,6 +59,13 @@
        (group-by (comp str namespace :db/ident))
        (into (sorted-map))))
 
+(defn e->ident-map
+  [db]
+  (->> (d/q '[:find ?e ?ident
+              :where [?e :db/ident ?ident]]
+            db)
+       (into {})))
+
 (defn schema-tree-level
   [x]
   (cond (keyword? (first x)) :leaf
@@ -134,12 +141,24 @@ by the keys."
     (sh/sh "open" (.getAbsolutePath f))
     f))
 
+
+(defn- seesaw-row-ize
+  "Workaround seesaw keying on vector instead of indexed"
+  [x]
+  (cond
+   (vector? x) x
+   (map? x) x
+   (instance? clojure.lang.Indexed x) (mapv #(nth x %) (range (count x)))
+   :default x))
+
+(def ^:dynamic *render-length* 1000)
+
 (def renderers-ref
   (atom
    [[::specs/table
      (fn [[titles content]]
        (ss/scrollable (table* :model [:columns titles
-                                      :rows (take 1000 content)]
+                                      :rows (take *render-length* content)]
                               :font (font :size (font-size))
                               :show-grid? true)))]
     [::specs/schema-by-ns
@@ -151,7 +170,7 @@ by the keys."
     [::specs/rectangle
      (fn [data]
        (ss/scrollable (table* :model [:columns (map str (range (count (first data))))
-                                      :rows (take 1000 data)]
+                                      :rows (into [] (comp (take *render-length*) (map seesaw-row-ize)) data)]
                               :font (font :size (font-size))
                               :show-grid? true?)))]]))
 
@@ -160,10 +179,31 @@ by the keys."
   (reduce
    (fn [_ [spec f]]
      (when (s/valid? spec x)
-       (ss/config! @frame :content (f x))
+       (ss/config! @frame :content (f x) :title (str "Rendering: " spec))
        (reduced spec)))
    nil
    @renderers-ref))
+
+(defn identify
+  "Convert datom to a vector with idents in e an a position where possible."
+  [datom e->ident]
+  [(get e->ident (:e datom) (:e datom))
+   (get e->ident (:a datom))
+   (:v datom)
+   (:tx datom)
+   (:added datom)])
+
+(defn last-txes
+  "Returns a flat collection of datoms from the last n transactions"
+  ([conn] (last-txes conn 1))
+  ([conn n]
+     (let [db (d/db conn)
+           e->ident (e->ident-map db)
+           t (- (:t db) n)]
+       (into
+        []
+        (comp (map :tx-data) cat (map #(identify % e->ident)))
+        (d/tx-range conn {:start (inc t) :end (inc (:t db))})))))
 
 (defn render-and-print
   "REPL printer that will render eval results into a Swing window,
@@ -174,4 +214,5 @@ if they match a spec in renderers-ref. Use with e.g.
   [x]
   (render x)
   (prn x))
+
 
