@@ -3,7 +3,9 @@
    [clojure.data.csv :as csv]
    [clojure.java.io :as io]
    [clojure.java.shell :as sh]
+   [clojure.main :as main]
    [clojure.spec.alpha :as s]
+   [clojure.string :as str]
    [datomic.client.api.alpha :as d]
    [datomic.dodc.repl-ui.specs :as specs]
    [seesaw.core :as ss]
@@ -16,8 +18,9 @@
 (set! *warn-on-reflection* true)
 
 (defonce frame
-  (delay (-> (ss/frame :title "Day of Datomic")
-             ss/pack! ss/show!)))
+  (delay (-> (ss/frame :title "Day of Datomic"
+                       :width 600 :height 400)
+             ss/show!)))
 
 (defn display!
   [content]
@@ -216,3 +219,15 @@ if they match a spec in renderers-ref. Use with e.g.
   (prn x))
 
 
+(defn abbrev-ns-name
+  [n]
+  (str/replace n #"(([^.])[^.]*\.)(?=.)" "$2."))
+
+(defn prompt
+  []
+  (printf "dotd:%s=> " (abbrev-ns-name (ns-name *ns*))))
+
+(defn -main
+  [& _]
+  (main/repl :print render-and-print
+             :prompt prompt))

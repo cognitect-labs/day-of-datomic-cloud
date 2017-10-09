@@ -6,6 +6,7 @@
  '[clojure.main :as main]
  '[clojure.pprint :as pp]
  '[clojure.spec.alpha :as s]
+ '[clojure.string :as str]
  '[datomic.dodc.repl-ui :as ui :refer (label! table! spreadsheet! tree!)]
  '[datomic.dodc.repl-ui.specs :as ui-specs]
  '[datomic.client.api.alpha :as d]
