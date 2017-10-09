@@ -31,7 +31,7 @@
     ::specs/rectangle]))
 
 (defn spec-for [x]
-  (or (some #(when (s/vlaid? % x)
+  (or (some #(when (s/valid? % x)
                %) @spec-ordering)
       ::unknown))
 
@@ -54,7 +54,6 @@
 
 (defn render [data-state data]
   (let [spec (spec-for data)]
-    (println "SPEC " spec)
     (send data-state assoc :spec spec :data data :title (str "REPL Eval: " spec))))
 
 (defn render-and-print
