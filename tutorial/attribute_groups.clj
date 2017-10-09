@@ -47,6 +47,5 @@
        [?e ?a]]
      db rules)
 
-(repl/delete-scratch-dbs "config.edn")
-
+(repl/delete-scratch-db conn "config.edn")
 

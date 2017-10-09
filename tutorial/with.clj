@@ -43,4 +43,4 @@
        :where [?monster :monster/heads ?heads]]
      db)
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

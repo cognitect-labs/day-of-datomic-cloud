@@ -58,4 +58,4 @@
 
 (d/pull db '[*] ent-id)
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

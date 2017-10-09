@@ -45,4 +45,4 @@
 ;; retraction recursively retracts component comments
 (assert (= retracted-es #{story comment-1 comment-2}))
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

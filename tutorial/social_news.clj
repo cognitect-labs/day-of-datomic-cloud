@@ -111,4 +111,4 @@
   (d/q '[:find (pull ?e [:user/email {:user/upVotes [:story/url]}])
          :where [?e :user/email]] (d/db conn)))
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

@@ -27,7 +27,16 @@
     (d/create-database client {:db-name db-name})
     (d/connect client {:db-name db-name})))
 
-(defn delete-scratch-dbs
+(defn delete-scratch-db
+  [conn cfg-file]
+  "Deletes the scratch db from the provided conn"
+  (let [cfg (read-string (slurp cfg-file))
+        client (d/client cfg)
+        db-name (:db-name conn)]
+    (println "Deleting DB: " db-name)
+    (d/delete-database client {:db-name db-name})))
+
+(defn- delete-all-scratch-dbs
   [cfg-file]
   "Deletes all DBs with the prefix \"day-of-datomic-cloud-scratch-\""
   (let [cfg (read-string (slurp cfg-file))

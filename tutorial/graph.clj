@@ -56,4 +56,4 @@
        (user-roles-in-groups ?user2 ?role ?group)]
      db rules [:user/name "User1"] [:user/name "User2"])
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

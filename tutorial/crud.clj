@@ -61,4 +61,4 @@
      (sort-by :tx)
      (pp/print-table [:e :a :v :tx :op]))
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

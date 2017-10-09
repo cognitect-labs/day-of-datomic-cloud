@@ -41,3 +41,4 @@
               [?e :inv/count ?count]]
      db)
 
+(repl/delete-scratch-db conn "config.edn")

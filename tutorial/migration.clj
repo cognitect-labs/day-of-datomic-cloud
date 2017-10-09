@@ -29,4 +29,4 @@
 ;; depended on them
 (schema/has-attribute? db :story/title)
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

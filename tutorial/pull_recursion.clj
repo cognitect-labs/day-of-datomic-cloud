@@ -57,4 +57,4 @@
 (d/pull (d/db conn) '[:person/name {:person/_friend 1}] anne-id)
 (d/pull (d/db conn) '[:person/name {:person/_friend ...}] anne-id)
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

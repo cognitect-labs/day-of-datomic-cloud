@@ -31,4 +31,4 @@
 (-> (d/tx-range conn {:start latest-tx :end (inc latest-tx)})
     seq first :tx-data count)
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

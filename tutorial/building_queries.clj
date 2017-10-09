@@ -63,4 +63,4 @@
                        [?e :user/lastName ?lname]]}
       :args [db "Stuart" "Smalley"]})
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")

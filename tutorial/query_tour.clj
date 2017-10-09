@@ -92,4 +92,4 @@
           :user/firstName)
      (sort-by first))
 
-(repl/delete-scratch-dbs "config.edn")
+(repl/delete-scratch-db conn "config.edn")
