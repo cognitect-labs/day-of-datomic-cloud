@@ -14,10 +14,10 @@
   (ui/label :text (str "No Renderer for " spec)))
 
 (defui Stage
-  (render [this {:keys [title] :as state}]
+  (render [this {:keys [title shown] :as state}]
           (ui/stage
            :title title
-           :shown true
+           :shown shown
            :min-width 600
            :min-height 600
            :scene (ui/scene
@@ -65,6 +65,7 @@ if they match a spec in renderers-ref. Use with e.g.
   []
   (let [data-state (agent {:title "REPL Eval"
                            :spec nil
+                           :shown false
                            :data nil})
         handler-fn (fn [event] nil) ;; No UI events for now
         ui-state (agent (dom/app (stage @data-state) handler-fn))]
@@ -72,6 +73,7 @@ if they match a spec in renderers-ref. Use with e.g.
                                 (send ui-state
                                       (fn [old-ui]
                                         (dom/update-app old-ui (stage @data-state))))))
+    (send data-state assoc :shown true)
     (fn [x]
       (render data-state x)
       (prn x))))
@@ -82,6 +84,7 @@ if they match a spec in renderers-ref. Use with e.g.
   (let [f (render-and-print)]
     (dotimes [x 10]
       (f [[:x :y] [{:x 1 :y 2} {:x x :y 3}]])
+      (println x)
       (Thread/sleep 1000))
     (f "Hey"))
 
