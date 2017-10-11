@@ -192,8 +192,8 @@
     (compare
       [_ x y]
       (cond
-        (< (:t x) (:t y)) -1
-        (> (:t x) (:t y)) 1
+        (< (:tx x) (:tx y)) -1
+        (> (:tx x) (:tx y)) 1
         (< (:e x) (:e y)) -1
         (> (:e x) (:e y)) 1
         (< (:a x) (:a y)) -1
