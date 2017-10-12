@@ -202,7 +202,7 @@ by the keys."
   ([conn n]
      (let [db (d/db conn)
            e->ident (e->ident-map db)
-           t (- (:t db) n)]
+           t (max 0 (- (:t db) n))]
        (into
         []
         (comp (map :tx-data) cat (map #(identify % e->ident)))
