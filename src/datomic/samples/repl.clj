@@ -10,7 +10,7 @@
   (:require [clojure.data.generators :as gen]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
-            [datomic.client.api.alpha :as d])
+            [datomic.client.api :as d])
   (:import java.util.Random
            (java.util UUID)))
 

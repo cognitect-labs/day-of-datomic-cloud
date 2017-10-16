@@ -9,7 +9,7 @@
 ;; Install sample data per https://github.com/Datomic/mbrainz-import
 
 ;; get connected
-(require '[datomic.client.api.alpha :as d])
+(require '[datomic.client.api :as d])
 (def cfg (read-string (slurp "config.edn")))
 (def client (d/client cfg))
 (def db-name "mbrainz-1968-1973")

@@ -6,7 +6,7 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api.alpha :as d])
+(require '[datomic.client.api :as d])
 (import 'clojure.lang.ExceptionInfo)
 
 ;; Define the configuration for the client:

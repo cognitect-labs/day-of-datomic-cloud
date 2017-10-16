@@ -9,7 +9,7 @@
  '[clojure.string :as str]
  '[datomic.dodc.repl-ui :as ui :refer (label! table! spreadsheet! tree!)]
  '[datomic.dodc.repl-ui.specs :as ui-specs]
- '[datomic.client.api.alpha :as d]
+ '[datomic.client.api :as d]
  '[seesaw.core :as ss]
  '[seesaw.table :as table]
  '[seesaw.tree :as tree])

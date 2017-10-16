@@ -10,7 +10,7 @@
 ;; sample data at https://github.com/Datomic/mbrainz-importer
 
 ;; get connected
-(require '[datomic.client.api.alpha :as d])
+(require '[datomic.client.api :as d])
 
 (def cfg (read-string (slurp "config.edn")))
 (def client (d/client cfg))

@@ -1,4 +1,4 @@
-(require '[datomic.client.api.alpha :as d]
+(require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl]
          '[clojure.data.csv :as csv]
          '[clojure.edn :as edn])

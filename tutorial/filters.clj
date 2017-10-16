@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[clojure.pprint :as pp]
-         '[datomic.client.api.alpha :as d]
+         '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
 
 (def conn (repl/scratch-db-conn "config.edn"))

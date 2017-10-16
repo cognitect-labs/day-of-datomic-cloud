@@ -6,7 +6,7 @@
    [clojure.main :as main]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [datomic.client.api.alpha :as d]
+   [datomic.client.api :as d]
    [datomic.dodc.repl-ui.specs :as specs]
    [seesaw.core :as ss]
    [seesaw.font :as font]

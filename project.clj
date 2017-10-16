@@ -6,6 +6,6 @@
                  [org.clojure/data.generators "0.1.2"]
                  [org.clojure/data.csv "0.1.4"]
                  [org.clojure/data.json "0.2.6"]
-                 [com.datomic/client-cloud "0.8.42"]
+                 [com.datomic/client-cloud "0.8.44"]
                  [seesaw/seesaw "1.4.5"]])
 

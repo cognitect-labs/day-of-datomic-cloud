@@ -5,7 +5,7 @@
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
-(require '[datomic.client.api.alpha :as d]
+(require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
 
 (def conn (repl/scratch-db-conn "config.edn"))

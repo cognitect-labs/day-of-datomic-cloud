@@ -9,7 +9,7 @@
 ;; The examples below parallel http://docs.datomic.com/cloud/query/query-data-reference.html
 ;; sample data at https://github.com/Datomic/mbrainz-importer
 
-(require '[datomic.client.api.alpha :as d])
+(require '[datomic.client.api :as d])
 
 ;; Define the configuration for your client:
 (def cfg (read-string (slurp "config.edn")))

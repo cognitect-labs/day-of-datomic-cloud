@@ -1,5 +1,5 @@
 (ns datomic.samples.schema
-  (:require [datomic.client.api.alpha :as d]))
+  (:require [datomic.client.api :as d]))
 
 (defn cardinality
   "Returns the cardinality (:db.cardinality/one or

@@ -8,14 +8,14 @@
 
 (ns-unalias 'boot.user 'd)
 
-(require '[datomic.client.api.async.alpha :as d])
+(require '[datomic.client.api.async :as d])
 
-(require '[datomic.client.api.alpha :as d])
+(require '[datomic.client.api :as d])
 (d/q '[:find ?nomen
        :where [_ :artist/name ?name]]
      db)
 
-(require '[datomic.client.api.async.alpha :as d]
+(require '[datomic.client.api.async :as d]
          '[clojure.core.async :refer (<!!)])
 
 (<!! (d/q {:query '[:find ?nomen
