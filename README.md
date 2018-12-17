@@ -10,13 +10,13 @@ for learning [Datomic Cloud](http://datomic.com) at a Clojure REPL.
 $ brew install clojure
 ```
 
-* [Create a Datomic Cloud System](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/getting-started.html).
+* [Create a Datomic Cloud System](https://docs.datomic.com/cloud/getting-started/getting-started.html).
 
 * Clone this repo locally
 
-* Make a copy of the config.edn.example file and edit it, providing your Datomic Cloud connection [configuration information](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/connecting.html#creating-database).
+* Make a copy of the config.edn.example file and edit it, providing your Datomic Cloud connection [configuration information](https://docs.datomic.com/cloud/getting-started/connecting.html#creating-database).
 
-* Make sure you are running a [SOCKS Proxy](https://docs-gateway-dev2-952644531.us-east-1.elb.amazonaws.com:8181/cloud/getting-started/configuring-access.html#socks-proxy) to your Datomic Cloud Bastion.
+* Make sure you are running a [SOCKS Proxy](https://docs.datomic.com/cloud/getting-started/configuring-access.html#socks-proxy) to your Datomic Cloud Bastion.
 
 * Start a Clojure REPL in the day-of-datomic-cloud directory:
 ```
