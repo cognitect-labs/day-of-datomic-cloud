@@ -41,7 +41,7 @@
 
 ;; What else happened at the same time (i.e. during the same transaction)
 ;; as Joe moving to Broadway?
-(d/tx-range conn {:start tx-id :end tx-id})
+(d/tx-range conn {:start tx-id :end (inc tx-id)})
 
 ;; Note that we see the same wall clock time we just queried for, as well
 ;; as 4 other datoms. One is the assertion of Joe moving to Broadway.
