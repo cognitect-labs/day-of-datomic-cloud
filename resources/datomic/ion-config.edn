@@ -1,0 +1,3 @@
+{:allow [datomic.samples.attr-preds/*
+         datomic.samples.entity-preds/*]
+ :app-name "<YOUR-APP-NAME"}
