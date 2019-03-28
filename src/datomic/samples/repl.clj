@@ -213,3 +213,27 @@
             "tx" (format "0x%x" t)
             "added" added}))
        (pp/print-table ["e" "a" "v" "tx" "added"])))
+
+(defn root-cause
+  [^Throwable x]
+  (when x
+    (let [cause (.getCause x)]
+      (if cause
+        (recur cause)
+        x))))
+
+(defn find-ex-data
+  "Returns the first t in the cause chain that has ex-data."
+  [^Throwable t]
+  (loop [t t]
+    (when t
+      (if (ex-data t)
+        t
+        (recur (.getCause t))))))
+
+(defmacro thrown-data
+  [& body]
+  `(try
+     ~@body
+     (catch Throwable t#
+       (ex-data (find-ex-data t#)))))
