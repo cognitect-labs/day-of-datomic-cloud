@@ -2,7 +2,7 @@
  {org.clojure/data.csv {:mvn/version "0.1.4"}
   org.clojure/data.json {:mvn/version "0.2.6"}
   org.clojure/data.generators {:mvn/version "0.1.2"}
-  org.clojure/clojure {:mvn/version "1.9.0-beta2"}
-  com.datomic/client-cloud {:mvn/version "0.8.63"}
+  org.clojure/clojure {:mvn/version "1.10.0"}
+  com.datomic/client-cloud {:mvn/version "0.8.71"}
   seesaw/seesaw {:mvn/version "1.4.5"}}
  :paths ["src" "tutorial" "doc-examples" "resources"]}
