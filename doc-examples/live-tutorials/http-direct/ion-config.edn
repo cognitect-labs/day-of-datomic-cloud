@@ -1,0 +1,2 @@
+{:http-direct {:handler-fn http-direct.tutorial/handler}
+ :app-name "http-direct-tutorial"}
