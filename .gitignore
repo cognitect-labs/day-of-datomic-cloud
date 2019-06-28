@@ -1,3 +1,6 @@
 .cpcache
 temp/
+config.edn
+.idea/
+target/
 
