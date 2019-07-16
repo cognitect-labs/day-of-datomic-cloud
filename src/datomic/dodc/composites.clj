@@ -22,4 +22,5 @@ for any composite attributes built from attr."
                    (completing (fn [x ids] (inc x)))
                    0
                    (:tx-data result))]
-        (println {:batch-size batch-size :first-e (:e (first batch)) :added added})))))
+        (println {:batch-size batch-size :first-e (:e (first batch)) :added added})
+        (Thread/sleep (* 1000 pacing-sec))))))
