@@ -1,0 +1,99 @@
+(require
+ '[clojure.data.csv :as csv]
+ '[clojure.edn :as edn]
+ '[clojure.java.io :as io]
+ '[datomic.client.api :as d])
+
+;; data from http://fastml.com/goodbooks-10k
+;; clone git@github.com:zygmuntz/goodbooks-10k.git
+(def repo-dir "goodbooks-10k")
+
+;; set this to point to your own system
+(def client-cfg {:server-type :cloud
+                 :region "us-east-1"
+                 :system "tomhanks"
+                 :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+                 :proxy-port 8182})
+
+(set! *print-length* 10)
+
+@(def columns
+   (with-open [f (io/reader (io/file repo-dir "books.csv"))]
+     (first (csv/read-csv f))))
+
+@(def example
+   (with-open [f (io/reader (io/file repo-dir "books.csv"))]
+     (second (csv/read-csv f))))
+
+(defn starts-with-digit?
+  [s]
+  (boolean (re-find #"^\d" s)))
+
+;; necessary because CSV is not self-describing
+;; this propagates some oddities in the source data (e.g. year as double)
+(defn guess-schema-type
+  [col v]
+  (if (#{"isbn" "isbn13"} col)
+    :db.type/string
+    (if (starts-with-digit? v)
+      (if (int? (edn/read-string v))
+        :db.type/long
+        :db.type/double)
+      :db.type/string)))
+
+@(def schema
+   (mapv
+    (fn [col example]
+      {:db/ident (keyword "book" col)
+       :db/cardinality :db.cardinality/one
+       :db/valueType (guess-schema-type col example)})
+    columns
+    example))
+
+(def client (d/client client-cfg))
+(d/create-database client {:db-name "goodreads-10k-1"})
+
+(def conn (d/connect client {:db-name "goodreads-10k-1"}))
+
+(d/transact conn {:tx-data schema})
+
+(defn row->entity
+  [row schema]
+  (into
+   {}
+   (remove (fn [[a v]] (nil? v))) ;; input data has some missing columns
+   (mapv
+    (fn [data schema]
+      [(:db/ident schema) (if (= :db.type/string (:db/valueType schema))
+                            data
+                            (edn/read-string data))])
+    row
+    schema)))
+
+@(def book-entities
+   (with-open [f (io/reader (io/file repo-dir "books.csv"))]
+     (let [rows (drop 1 (csv/read-csv f))]
+       (mapv #(row->entity % schema) rows))))
+
+(d/transact conn {:tx-data book-entities})
+
+;; peek at the books data
+(def db (d/db conn))
+
+(time
+ (d/q '[:find ?title ?rating
+        :where
+        [?book :book/title ?title]
+        [?book :book/average_rating ?rating]
+        [(<= 4.8 ?rating)]]
+      db))
+
+(time
+ (d/q '[:find ?title ?rating
+        :where
+        [?book :book/average_rating ?rating]
+        [(<= 4.8 ?rating)]
+        [?book :book/title ?title]]
+      db))
+
+
