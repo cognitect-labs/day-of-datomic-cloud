@@ -97,3 +97,50 @@
       db))
 
 
+(d/transact conn {:tx-data [{:db/ident :book/book_id
+                             :db/unique :db.unique/identity}]})
+
+
+@(def rating-columns
+   (with-open [f (io/reader (io/file repo-dir "ratings.csv"))]
+     (first (csv/read-csv f))))
+
+@(def rating-example
+   (with-open [f (io/reader (io/file repo-dir "ratings.csv"))]
+     (second (csv/read-csv f))))
+
+(d/transact conn {:tx-data [{:db/ident :rating/book
+                             :db/cardinality :db.cardinality/one
+                             :db/valueType :db.type/ref}
+                            {:db/ident :rating/user_id
+                             :db/cardinality :db.cardinality/one
+                             :db/valueType :db.type/long}
+                            {:db/ident :rating/book+user_id
+                             :db/cardinality :db.cardinality/one
+                             :db/unique :db.unique/identity
+                             :db/valueType :db.type/tuple
+                             :db/tupleAttrs [:rating/book :rating/user_id]}
+                            {:db/ident :rating/rating
+                             :db/cardinality :db.cardinality/one
+                             :db/valueType :db.type/long}]})
+
+(defn row->rating
+  [[user_id book_id rating]]
+  {:rating/book [:book/book_id (edn/read-string book_id)]
+   :rating/user_id (edn/read-string user_id)
+   :rating/rating (edn/read-string rating)})
+
+(row->rating rating-example)
+
+(time
+ @(def rating-count
+    (with-open [f (io/reader (io/file repo-dir "ratings.csv"))]
+      (count (csv/read-csv f)))))
+
+(with-open [f (io/reader (io/file repo-dir "ratings.csv"))]
+  (let [rows (drop 1 (csv/read-csv f))]
+    (doseq [rows (partition-all 10000 rows)]
+      (print ".") (flush)
+      (d/transact conn {:tx-data (map row->rating rows)}))))
+
+
