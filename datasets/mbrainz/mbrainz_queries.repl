@@ -1,0 +1,34 @@
+(require '[datomic.client.api :as d])
+(set! *print-length* 25)
+
+(def client-cfg {:server-type :cloud
+                 :region "us-east-1"
+                 :system "tomhanks"
+                 :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+                 :proxy-port 8182})
+
+(def client (d/client client-cfg))
+
+(def conn (d/connect client {:db-name "mbrainz-subset-0"}))
+(def db (d/db conn))
+
+(time
+ (d/q '[:find ?name
+        :where
+        [_ :track/name ?name]
+        [(clojure.string/starts-with? ?name "Stu")]]
+      db))
+
+;; faster then string predicate
+(time
+ (d/q '[:find ?name
+        :in $ ?first ?last
+        :where
+        [_ :track/name ?name]
+        [(<= ?first ?name)]
+        [(< ?name ?last)]]
+      db "Stu" "Stuv"))
+
+
+
+
