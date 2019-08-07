@@ -1,4 +1,4 @@
-l{:deps
+{:deps
  {org.clojure/data.csv {:mvn/version "0.1.4"}
   org.clojure/data.json {:mvn/version "0.2.6"}
   org.clojure/data.generators {:mvn/version "0.1.2"}
