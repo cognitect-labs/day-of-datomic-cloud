@@ -1,0 +1,38 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require '[datomic.client.api :as d])
+
+;; replace with your own config and db-name
+(def cfg {:server-type :cloud
+          :region "us-east-1"
+          :system "tomhanks"
+          :endpoint "http://entry.tomhanks.us-east-1.datomic.net:8182/"
+          :proxy-port 8182})
+(def client (d/client cfg))
+(def conn (d/connect client {:db-name "datomic-docs-tutorial"}))
+(def db (d/db conn))
+
+;; The results below assume that you have populated the database per
+;; https://docs.datomic.com/cloud/tutorial/tutorial.html
+
+(->> (d/datoms db
+               {:index :avet
+                :components [:inv/sku]})
+     (take 3)
+     (map :v))
+;; => ("SKU-0" "SKU-1" "SKU-10")
+
+(->> (d/index-range
+      db
+      {:attrid :inv/sku
+       :start "SKU-42"
+       :end "SKU-44"})
+     (map :v))
+;; => ("SKU-42" "SKU-43")
+ 
