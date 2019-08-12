@@ -1,0 +1,72 @@
+(require
+ '[datomic.client.api :as d]
+ '[cognitect.anomalies :as anom])
+(set! *print-length* 10)
+
+(defn averager
+  "Reducing fn that calculates average of its inputs"
+  ([] [0 0])                  ;; init
+  ([[n total]]                ;; complete
+     (/ total (double n)))
+  ([[n total] count]          ;; step
+     [(inc n) (+ total count)]))
+
+;; check that averager actually averages
+(transduce identity averager [5 4])
+
+(defn nth-counter
+  "Transform for chunked query results that gets the count of
+the nth item from each result tuple."
+  [n]
+  (comp (halt-when :anom/category)  ;; fail fast
+        cat                         ;; flatten the chunks
+        (map #(nth % n))            ;; nth of chunk
+        (map count)))
+
+;; check that first-counter returns count of first element in tuple
+(def chunks [[[:person-1 :name "Flintstone"]
+              [:person-2 :name "Rubble"]]])
+(sequence (nth-counter 2) chunks)
+
+
+;; compose reducing-fn and transform
+(transduce (nth-counter 2) averager chunks)
+
+;; replace with your own cfg/db-name
+(def client-cfg {:server-type :cloud
+                 :region "us-east-1"
+                 :system "tomhanks"
+                 :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+                 :proxy-port 8182})
+(def client (d/client client-cfg))
+(def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
+
+(def db (d/db conn))
+
+(require
+ '[clojure.core.async :as a :refer (<!!)]
+ '[datomic.client.api.async :as async])
+
+;; calculate the average length of artist name by transduction
+(def datoms-query {:limit -1
+                   :chunk 10000
+                   :index :aevt
+                   :components [:artist/name]})
+(->> (async/datoms db datoms-query)
+     (a/transduce (nth-counter 2) averager (averager))
+     <!!)
+
+(d/q '[:find (avg ?ct)
+       :with ?artist
+       :where
+       [?artist :artist/name ?name]
+       [(count ?name) ?ct]]
+     db)
+=> [[13.893066724625081]]
+
+
+
+
+
+
+
