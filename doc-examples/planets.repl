@@ -1,0 +1,160 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require
+ '[clojure.pprint :as pp]
+ '[datomic.client.api :as d])
+
+;; edit to match your system
+(def client-cfg
+  {:server-type :cloud
+   :region "us-east-1"
+   :system "tomhanks"
+   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+   :proxy-port 8182})
+(def client (d/client client-cfg))
+
+;; "body" per https://en.wikipedia.org/wiki/Astronomical_object
+(def schema
+  [{:db/ident :body/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/unique :db.unique/identity}
+   {:db/ident :body/diameter
+    :db/valueType :db.type/long
+    :db/cardinality :db.cardinality/one
+    :db/doc "Diameter in kilometers"}
+   {:db/ident :body/satellites
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
+
+(d/create-database client {:db-name "planets-1"})
+(def conn (d/connect client {:db-name "planets-1"}))
+
+(d/transact conn {:tx-data schema})
+
+;; data from https://nssdc.gsfc.nasa.gov/planetary/factsheet/
+
+;; list form
+(def mercury-data
+  [[:db/add "mercury" :body/name "Mercury"]
+   [:db/add "mercury" :body/diameter 4879]])
+(d/transact conn {:tx-data mercury-data})
+=> {:db-before {...},
+    :db-after {...},
+    :tx-data [#datom[13194139533321 50 #inst "2019-08-13T19:06:45.016-00:00" 13194139533321 true]
+              #datom[38241014414049356 73 "Mercury" 13194139533321 true]
+              #datom[38241014414049356 74 4879 13194139533321 true]],
+    :tempids {"mercury" 38241014414049356}}
+
+;; map form
+(def venus-data
+  {:body/name "Venus"
+   :body/diameter 12104})
+(d/transact conn {:tx-data [venus-data]})
+
+;; map form with nested data
+(def earth-data
+  {:body/name "Earth"
+   :body/diameter 12756
+   :body/satellites [{:body/name "Moon"
+                      :body/diameter 3475}]})
+(d/transact conn {:tx-data [earth-data]})
+
+;; look at the data so far
+(def db (d/db conn))
+(d/q '[:find ?name ?diam
+       :syms name diam
+       :where
+       [?e :body/name ?name]
+       [?e :body/diameter ?diam]]
+     db)
+
+;; add another attribute
+(def period [{:db/ident :body/rotation-period
+              :db/cardinality :db.cardinality/one
+              :db/valueType :db.type/double}])
+(d/transact conn {:tx-data period})
+
+;; upsert -- these unique body names already exist,
+;; no new entity ids will be assigned
+(def period-data
+  [{:db/id [:body/name "Mercury"]
+    :body/rotation-period 1407.6}
+   {:db/id [:body/name "Venus"]
+    :body/rotation-period -5832.5}
+   {:db/id [:body/name "Earth"]
+    :body/rotation-period 23.9}])
+(d/transact conn {:tx-data period-data})
+
+;; did we forget the period for any bodies?
+(def db (d/db conn))
+(d/q '[:find ?e ?name
+       :keys db/id body/name
+       :where
+       [?e :body/name ?name]
+       (not [?e :body/rotation-period])]
+     db)
+
+
+;; Doh! We forget that sneaky moon. Let's add it
+;; introduce a typo, misplaced decimal point
+(def bad-moon-data
+  [{:db/id [:body/name "Moon"]
+    :body/rotation-period 65.57}])
+(d/transact conn {:tx-data bad-moon-data})
+
+(def fix-moon-data
+  [{:db/id [:body/name "Moon"]
+    :body/rotation-period 655.7}
+   {:db/id "datomic.tx"
+    :db/doc "Fix typo"}])
+
+(d/transact conn {:tx-data fix-moon-data})
+(def tx-data (:tx-data *1))
+
+(defn datom->map
+  [{:keys [e a v tx added]}]
+  {:e e :a a :v v :tx tx :op added})
+
+;; note the retraction of the old, incorrect value
+(pp/print-table (map datom->map tx-data))
+|                :e | :a |                           :v |            :tx |   :op |
+|-------------------+----+------------------------------+----------------+-------|
+|    13194139533327 | 50 | Tue Aug 13 15:22:13 EDT 2019 | 13194139533327 |  true |
+| 35127197484187727 | 76 |                        655.7 | 13194139533327 |  true |
+| 35127197484187727 | 76 |                        65.57 | 13194139533327 | false |
+|    13194139533327 | 63 |                     Fix typo | 13194139533327 |  true |
+
+
+(def earth-becomes-moon
+  [{:db/id [:body/name "Earth"]
+    :body/name "Moon"}])
+
+(d/transact conn {:tx-data earth-becomes-moon})
+=> Unique conflict: :body/name,
+   value: Moon
+   already held by: 35127197484187727
+   asserted for: 60671051620679758
+
+;; add Pluto
+(def pluto-data
+  {:body/name "Pluto"
+   :body/diameter 2370
+   :body/rotation-period -153.3})
+(d/transact conn {:tx-data [pluto-data]})
+
+;; or maybe Pluto is a not a planet?
+(def retract-pluto
+  [:db/retractEntity [:body/name "Pluto"]])
+(d/transact conn {:tx-data [retract-pluto]})
+(:tx-data *1)
+=> [#datom[13194139533329 50 #inst "2019-08-13T21:24:46.459-00:00" 13194139533329 true]
+    #datom[50436797389340752 73 "Pluto" 13194139533329 false]
+    #datom[50436797389340752 74 2370 13194139533329 false]
+    #datom[50436797389340752 76 -153.3 13194139533329 false]]
