@@ -1,0 +1,61 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require '[datomic.client.api :as d])
+(set! *print-length* 10)
+
+;; edit to match your system
+(def client-cfg
+  {:server-type :cloud
+   :region "us-east-1"
+   :system "tomhanks"
+   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+   :proxy-port 8182})
+(def client (d/client client-cfg))
+
+(def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
+(def db (d/db conn))
+
+;; find and retrieve in one go
+(def artist-years-query
+  '[:find ?name ?start ?end
+    :syms Name StartYear EndYear
+    :in $ [?name ...]
+    :where [?artist :artist/name ?name]
+           [?artist :artist/startYear ?start]
+    [?artist :artist/endYear ?end]])
+
+(def artist-names ["The Beatles" "Johnny Cash"])
+
+(d/q artist-years-query db artist-names)
+=> [{Name "Johnny Cash", StartYear 1932, EndYear 2003}
+    {Name "The Beatles", StartYear 1957, EndYear 1970}]
+
+;; find in query, retrieve in pull pattern
+(def artists-query
+  '[:find (pull ?artist pattern)
+    :in pattern $ [?name ...]
+    :where [?artist :artist/name ?name]])
+
+(def years-pull [:artist/name
+                 :artist/startYear
+                 :artist/endYear])
+
+(d/q artists-query years-pull db artist-names)
+[[#:artist{:name "Johnny Cash", :startYear 1932, :endYear 2003}]
+ [#:artist{:name "The Beatles", :startYear 1957, :endYear 1970}]]
+
+
+
+
+
+
+
+
+
+
