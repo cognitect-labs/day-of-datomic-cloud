@@ -16,19 +16,19 @@
 
 (def db (d/db conn))
 
-;; basis-t is t of most recent transaction 
+;; basis-t is t of most recent transaction
 (def basis-t (:t db))
 
 ;; find the most recent transaction tx
 (def latest-tx
   (-> (d/tx-range conn {:start basis-t :end nil})
-      first :tx-data first :t))
+      first :data first :tx))
 
 ;; facts about the most recent transaction
 (d/pull db '[*] latest-tx)
 
 ;; how many datoms in most recent transaction?
 (-> (d/tx-range conn {:start latest-tx :end (inc latest-tx)})
-    seq first :tx-data count)
+    first :data count)
 
 (repl/delete-scratch-db conn "config.edn")

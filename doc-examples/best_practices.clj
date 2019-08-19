@@ -89,6 +89,6 @@
 
 (-> (d/tx-range conn {:start tx :end (inc tx)})
     first
-    :tx-data)
+    :data)
 
 (d/delete-database client {:db-name "best-practices-db"})

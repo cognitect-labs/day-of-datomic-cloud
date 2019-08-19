@@ -41,7 +41,8 @@
 
 ;; What else happened at the same time (i.e. during the same transaction)
 ;; as Joe moving to Broadway?
-(d/tx-range conn {:start tx-id :end (inc tx-id)})
+(-> (d/tx-range conn {:start tx-id :end (inc tx-id)})
+    first :data)
 
 ;; Note that we see the same wall clock time we just queried for, as well
 ;; as 4 other datoms. One is the assertion of Joe moving to Broadway.
@@ -50,11 +51,12 @@
 ;; It also looks like another entity moved from Elm to 2nd at the same time.
 ;; Let's find out who that is:
 (def ent-id
-  (->> (d/tx-range conn {:start tx-id :end tx-id})
+  (->> (d/tx-range conn {:start tx-id :end (inc tx-id)})
        first
-       :tx-data
+       :data
        (filter #(= (:v %) "Elm"))
-       first :e))
+       first
+       :e))
 
 (d/pull db '[*] ent-id)
 
