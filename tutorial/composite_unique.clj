@@ -11,26 +11,25 @@
   '[datomic.samples.repl :as repl])
 
 (def conn (repl/scratch-db-conn "config.edn"))
+(repl/transact-all conn (repl/resource "day-of-datomic-cloud/course-registration.edn"))
 
-(d/transact conn {:tx-data [{:db/ident :room/letter
-                             :db/valueType :db.type/string
-                             :db/cardinality :db.cardinality/one}
-                            {:db/ident :room/number
-                             :db/valueType :db.type/long
-                             :db/cardinality :db.cardinality/one}
-                            {:db/ident :room/number+letter
-                             :db/valueType :db.type/tuple
-                             :db/cardinality :db.cardinality/one
-                             :db/unique :db.unique/value
-                             :db/tupleAttrs [:room/number :room/letter]}]})
+(d/transact conn {:tx-data [{:semester/year 2018
+                             :semester/season :fall}
+                            {:course/id "BIO-101"}
+                            {:student/first "John"
+                             :student/last "Doe"
+                             :student/email "johndoe@university.edu"}]})
 
-(d/transact conn {:tx-data [{:room/number 42 :room/letter "B" :room/number+letter []}]})
+(d/transact conn {:tx-data [{:reg/course [:course/id "BIO-101"]
+                             :reg/semester [:semester/year+season [2018 :fall]]
+                             :reg/student [:student/email "johndoe@university.edu"]}]})
 
-(d/q '[:find (pull ?e [*])
-       :in $ ?number
-       :where [?e :room/number ?number]]
-     (d/db conn) 42)
+(d/q '[:find (pull ?e [*
+                       {:reg/course [*]
+                        :reg/semester [*]
+                        :reg/student [*]
+                        }])
+       :where [?e :reg/course]]
+     (d/db conn))
 
-(->
-  (d/transact conn {:tx-data [{:room/number 42 :room/letter "B" :room/number+letter []}]})
-  repl/thrown-data)
+(repl/delete-scratch-db conn "config.edn")
