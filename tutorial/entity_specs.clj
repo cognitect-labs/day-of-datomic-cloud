@@ -44,3 +44,5 @@
                                          :score/high 20
                                          :db/ensure :team/score}]})
     repl/thrown-data)
+
+(repl/delete-scratch-db conn "config.edn")

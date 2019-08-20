@@ -41,3 +41,5 @@
 (-> (d/with (d/with-db conn) {:tx-data [{:user/name "This user name is too long"
                                          :db/ensure :user/validate}]})
     repl/thrown-data)
+
+(repl/delete-scratch-db conn "config.edn")

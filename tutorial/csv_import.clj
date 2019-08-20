@@ -1,7 +1,8 @@
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl]
          '[clojure.data.csv :as csv]
-         '[clojure.edn :as edn])
+         '[clojure.edn :as edn]
+         '[clojure.java.io :as io])
 
 (def conn (repl/scratch-db-conn "config.edn"))
 
