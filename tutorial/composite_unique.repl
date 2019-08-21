@@ -1,0 +1,131 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require
+ '[clojure.pprint :as pp]
+ '[datomic.client.api :as d])
+(import
+ '[java.util UUID])
+
+;; edit to match your system
+(def client-cfg
+  {:server-type :cloud
+   :region "us-east-1"
+   :system "tomhanks"
+   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+   :proxy-port 8182})
+
+(def client (d/client client-cfg))
+
+(def db-name (str "course-reg-" (UUID/randomUUID)))
+
+(d/create-database client {:db-name db-name})
+
+(def conn (d/connect client {:db-name db-name}))
+
+(def base-schema
+  [{:db/ident :student/first
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :student/last
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :student/email
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/unique :db.unique/identity}
+   {:db/ident :semester/year
+    :db/valueType :db.type/long
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :semester/season
+    :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :semester/year+season
+    :db/valueType :db.type/tuple
+    :db/tupleAttrs [:semester/year :semester/season]
+    :db/cardinality :db.cardinality/one
+    :db/unique :db.unique/identity}
+   {:db/ident :course/id
+    :db/valueType :db.type/string
+    :db/unique :db.unique/identity
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :course/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}])
+
+(d/transact conn {:tx-data base-schema})
+
+(def registration-schema
+  [{:db/ident :reg/course
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :reg/semester
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :reg/student
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}])
+
+(d/transact conn {:tx-data registration-schema})
+
+(def tuple-schema
+  [{:db/ident :reg/course+semester+student
+    :db/valueType :db.type/tuple
+    :db/tupleAttrs [:reg/course :reg/semester :reg/student]
+    :db/cardinality :db.cardinality/one
+    :db/unique :db.unique/identity}])
+
+(d/transact conn {:tx-data tuple-schema})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; add a semester, course, and student
+(d/transact conn {:tx-data [{:semester/year 2018
+                             :semester/season :fall}
+                            {:course/id "BIO-101"}
+                            {:student/first "John"
+                             :student/last "Doe"
+                             :student/email "johndoe@university.edu"}]})
+
+;; register for the course
+(d/transact conn {:tx-data [{:reg/course [:course/id "BIO-101"]
+                             :reg/semester [:semester/year+season [2018 :fall]]
+                             :reg/student [:student/email "johndoe@university.edu"]}]})
+
+(def pull-pattern '[*
+                    {:reg/course [*]}
+                    {:reg/semester [*]}
+                    {:reg/year+season [*]}])
+
+;; find all registrations
+(d/q '[:find (pull ?e pull-pattern?)
+       :in $ pull-pattern?
+       :where [?e :reg/course+semester+student]]
+     (d/db conn)
+     pull-pattern)
+
+;; Note that datomic added the :reg/course+semester+student attribute
+
+;; Now unregister by retracting the parts of the tuple
+(let [reg-id (->> (d/q '[:find ?e
+                         :where [?e :reg/course+semester+student]]
+                       (d/db conn))
+                  ffirst)]
+  (d/transact conn {:tx-data
+                    [[:db/retract reg-id :reg/course [:course/id "BIO-101"]]
+                     [:db/retract reg-id :reg/semester [:semester/year+season [2018 :fall]]]
+                     [:db/retract reg-id :reg/student [:student/email "johndoe@university.edu"]]]}))
+
+;; retracting all of the parts also causes the Datomic to retract the composite
+(d/q '[:find (pull ?e [*])
+       :where [?e :reg/course+semester+student]]
+     (d/db conn))
+;; []
+
+;; clean up
+(d/delete-database client {:db-name db-name})
