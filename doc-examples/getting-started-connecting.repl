@@ -7,18 +7,25 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d])
+(import '(java.util UUID))
 
-;; Define the configuration for your client:
-(def cfg (read-string (slurp "config.edn")))
+;; edit to match your system
+(def client-cfg
+  {:server-type :cloud
+   :region "us-east-1"
+   :system "tomhanks"
+   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+   :proxy-port 8182})
 
 ;; Create a client:
 (def client (d/client cfg))
 
 ;; Create a new database:
-(d/create-database client {:db-name "movies"})
+(def db-name (str "movies-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
 
 ;; Connect to your new database:
-(def conn (d/connect client {:db-name "movies"}))
+(def conn (d/connect client {:db-name db-name}))
 
 ;; Define a small schema for a movie database:
 (def movie-schema [{:db/ident :movie/title
@@ -64,6 +71,4 @@
 (d/q all-titles-q db)
 
 ;; Delete the movies database when finished
-(d/delete-database client {:db-name "movies"})
-
-
+(d/delete-database client {:db-name db-name})
