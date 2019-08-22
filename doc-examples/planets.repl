@@ -9,6 +9,8 @@
 (require
  '[clojure.pprint :as pp]
  '[datomic.client.api :as d])
+(import
+ '(java.util UUID))
 
 ;; edit to match your system
 (def client-cfg
@@ -33,8 +35,10 @@
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many}])
 
-(d/create-database client {:db-name "planets-1"})
-(def conn (d/connect client {:db-name "planets-1"}))
+;; Create a new database:
+(def db-name (str "planets-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+(def conn (d/connect client {:db-name db-name}))
 
 (d/transact conn {:tx-data schema})
 
@@ -45,12 +49,12 @@
   [[:db/add "mercury" :body/name "Mercury"]
    [:db/add "mercury" :body/diameter 4879]])
 (d/transact conn {:tx-data mercury-data})
-=> {:db-before {...},
-    :db-after {...},
-    :tx-data [#datom[13194139533321 50 #inst "2019-08-13T19:06:45.016-00:00" 13194139533321 true]
-              #datom[38241014414049356 73 "Mercury" 13194139533321 true]
-              #datom[38241014414049356 74 4879 13194139533321 true]],
-    :tempids {"mercury" 38241014414049356}}
+;; => {:db-before {...},
+;;     :db-after {...},
+;;     :tx-data [#datom[13194139533321 50 #inst "2019-08-13T19:06:45.016-00:00" 13194139533321 true]
+;;               #datom[38241014414049356 73 "Mercury" 13194139533321 true]
+;;               #datom[38241014414049356 74 4879 13194139533321 true]],
+;;     :tempids {"mercury" 38241014414049356}}
 
 ;; map form
 (def venus-data
@@ -124,12 +128,12 @@
 
 ;; note the retraction of the old, incorrect value
 (pp/print-table (map datom->map tx-data))
-|                :e | :a |                           :v |            :tx |   :op |
-|-------------------+----+------------------------------+----------------+-------|
-|    13194139533327 | 50 | Tue Aug 13 15:22:13 EDT 2019 | 13194139533327 |  true |
-| 35127197484187727 | 76 |                        655.7 | 13194139533327 |  true |
-| 35127197484187727 | 76 |                        65.57 | 13194139533327 | false |
-|    13194139533327 | 63 |                     Fix typo | 13194139533327 |  true |
+;; |                :e | :a |                           :v |            :tx |   :op |
+;; |-------------------+----+------------------------------+----------------+-------|
+;; |    13194139533327 | 50 | Tue Aug 13 15:22:13 EDT 2019 | 13194139533327 |  true |
+;; | 35127197484187727 | 76 |                        655.7 | 13194139533327 |  true |
+;; | 35127197484187727 | 76 |                        65.57 | 13194139533327 | false |
+;; |    13194139533327 | 63 |                     Fix typo | 13194139533327 |  true |
 
 
 (def earth-becomes-moon
@@ -137,10 +141,10 @@
     :body/name "Moon"}])
 
 (d/transact conn {:tx-data earth-becomes-moon})
-=> Unique conflict: :body/name,
-   value: Moon
-   already held by: 35127197484187727
-   asserted for: 60671051620679758
+;; => Unique conflict: :body/name,
+;;    value: Moon
+;;    already held by: 35127197484187727
+;;    asserted for: 60671051620679758
 
 ;; add Pluto
 (def pluto-data
@@ -154,7 +158,32 @@
   [:db/retractEntity [:body/name "Pluto"]])
 (d/transact conn {:tx-data [retract-pluto]})
 (:tx-data *1)
-=> [#datom[13194139533329 50 #inst "2019-08-13T21:24:46.459-00:00" 13194139533329 true]
-    #datom[50436797389340752 73 "Pluto" 13194139533329 false]
-    #datom[50436797389340752 74 2370 13194139533329 false]
-    #datom[50436797389340752 76 -153.3 13194139533329 false]]
+;; => [#datom[13194139533329 50 #inst "2019-08-13T21:24:46.459-00:00" 13194139533329 true]
+;;     #datom[50436797389340752 73 "Pluto" 13194139533329 false]
+;;     #datom[50436797389340752 74 2370 13194139533329 false]
+;;     #datom[50436797389340752 76 -153.3 13194139533329 false]]
+
+
+;; history query
+(def history-by-identity-attr
+  '[:find ?tx ?inst ?identity ?attr-name ?value ?added
+    :syms tx inst identity attr value added
+    :in $ ?identity-attr
+    :where
+    [?e ?identity-attr ?identity]
+    [?e ?attr ?value ?tx ?added]
+    [?attr :db/ident ?attr-name]
+    [?tx :db/txInstant ?inst]])
+
+;; history db
+(def db (-> conn d/db d/history))
+
+;; invoke
+(->> (d/q history-by-identity-attr db :body/name)
+     (sort-by first))
+
+;; pretty!
+(pp/print-table *1)
+
+;; Delete the database when finished
+(d/delete-database client {:db-name db-name})
