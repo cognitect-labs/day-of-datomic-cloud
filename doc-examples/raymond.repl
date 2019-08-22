@@ -7,6 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d])
+(import '(java.util UUID))
 
 ;; edit to match your system
 (def client-cfg
@@ -17,6 +18,12 @@
    :proxy-port 8182})
 (def client (d/client client-cfg))
 
+;; Create a new database:
+(def db-name (str "raymond-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+
+(def conn (d/connect client {:db-name db-name}))
+
 (def schema
   [{:db/ident :person/name
     :db/valueType :db.type/string
@@ -24,9 +31,6 @@
    {:db/ident :person/loves
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one}])
-
-(d/create-database client {:db-name "raymond-1"})
-(def conn (d/connect client {:db-name "raymond-1"}))
 
 (d/transact conn {:tx-data schema})
 
@@ -56,15 +60,14 @@
 
 ;; entity ids are opaque numbers
 @(def entity-ids (mapv :db/id lovers))
-=> [24338789392449612 68803039619711053 32211292647325771]
+;; => [24338789392449612 68803039619711053 32211292647325771]
 
-(def ray-id 32211292647325771)
+(def ray-id (->> lovers (filter (comp #{"Ray"} :person/name)) first :db/id))
 (def db (d/db conn))
 (d/pull db '[*] ray-id)
-
-=> {:db/id 32211292647325771,
-    :person/name "Ray",
-    :person/loves #:db{:id 32211292647325771}}
+;; => {:db/id 32211292647325771,
+;;     :person/name "Ray",
+;;     :person/loves #:db{:id 32211292647325771}}
 
 ;; domain identity: make each person/name unique
 (def add-unique [{:db/id :person/name
@@ -75,11 +78,11 @@
 (def db (d/db conn))
 (d/pull db '[*] [:person/name "Debra"])
 
-=> {:db/id 24338789392449612,
-    :person/name "Debra",
-    :person/loves {:db/id 32211292647325771,
-                   :person/name "Ray",
-                   :person/loves #:db{:id 32211292647325771}}}
+;; => {:db/id 24338789392449612,
+;;     :person/name "Debra",
+;;     :person/loves {:db/id 32211292647325771,
+;;                    :person/name "Ray",
+;;                    :person/loves #:db{:id 32211292647325771}}}
 
 ;; person/name is a terrible unique id. Lots of people are named "Ray"
 ;; so let's make a globally unique identifier
@@ -94,17 +97,24 @@
     (fn [{:keys [db/id]}]
       [:db/add id :person/uuid (java.util.UUID/randomUUID)])
     lovers))
-=> [[:db/add 24338789392449612 :person/uuid #uuid "36577b7c-041b-4ceb-a5f8-433d3b435268"]
-    [:db/add 68803039619711053 :person/uuid #uuid "f975233b-e71f-4f94-80f2-6d261af50ac2"]
-    [:db/add 32211292647325771 :person/uuid #uuid "09f116ea-6691-42b0-b801-b838a1c389e5"]]
+;; => [[:db/add 24338789392449612 :person/uuid #uuid "36577b7c-041b-4ceb-a5f8-433d3b435268"]
+;;     [:db/add 68803039619711053 :person/uuid #uuid "f975233b-e71f-4f94-80f2-6d261af50ac2"]
+;;     [:db/add 32211292647325771 :person/uuid #uuid "09f116ea-6691-42b0-b801-b838a1c389e5"]]
 
 (d/transact conn {:tx-data add-person-uuids})
 
+@(def debra-db-id (->> lovers (filter (comp #{"Debra"} :person/name)) first :db/id))
+
+@(def debra-uuid (->> add-person-uuids
+                      (filter (comp #{debra-db-id} second))
+                      first
+                      last))
 
 (def db (d/db conn))
 (d/pull db
         '[:person/name]
-        [:person/uuid #uuid "36577b7c-041b-4ceb-a5f8-433d3b435268"])
-=> #:person{:name "Debra"}
+        [:person/uuid debra-uuid])
+;; => #:person{:name "Debra"}
 
-
+;; Delete the database when finished
+(d/delete-database client {:db-name db-name})
