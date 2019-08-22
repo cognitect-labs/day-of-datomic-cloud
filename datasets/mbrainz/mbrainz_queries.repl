@@ -19,7 +19,16 @@
         [(clojure.string/starts-with? ?name "Stu")]]
       db))
 
-;; faster then string predicate
+(time
+ (d/q '[:find (count ?name)
+        :in $ ?re-str
+        :where
+        [(re-pattern ?re-str) ?pat]
+        [_ :track/name ?name]
+        [(re-find ?pat ?name)]]
+      db "^Stu"))
+
+;; leverages index, faster than str or re
 (time
  (d/q '[:find ?name
         :in $ ?first ?last
