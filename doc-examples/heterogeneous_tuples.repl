@@ -1,0 +1,74 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require
+ '[clojure.pprint :as pp]
+ '[datomic.client.api :as d])
+
+;; edit to match your system
+(def client-cfg
+  {:server-type :cloud
+   :region "us-east-1"
+   :system "tomhanks"
+   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+   :proxy-port 8182})
+(def client (d/client client-cfg))
+
+(comment
+  (d/create-database client {:db-name "doc-examples"})
+  (def conn (d/connect client {:db-name "doc-examples"}))
+
+  (def player-schema
+    [{:db/ident :player/location
+      :db/valueType :db.type/tuple
+      :db/tupleTypes [:db.type/long :db.type/long]
+      :db/cardinality :db.cardinality/one}
+     {:db/ident :player/handle
+      :db/valueType :db.type/string
+      :db/cardinality :db.cardinality/one}])
+
+  (def player-data
+    [{:player/handle "Argent Adept"
+      :player/location [100 0]}
+     {:player/handle "Nightmist"
+      :player/location [50 50]}])
+
+  (d/transact conn {:tx-data player-schema})
+  (d/transact conn {:tx-data player-data})
+  )
+
+(def conn (d/connect client {:db-name "doc-examples"}))
+(def db (d/db conn))
+
+;; passing tuple to query
+(d/q '[:find ?handle
+       :in $ ?location
+       :where [?player :player/location ?location]
+              [?player :player/handle ?handle]]
+     db [100 0])
+=> [["Argent Adept"]]
+
+;; making a tuple in query
+(d/q '[:find ?handle
+       :in $ ?x ?y
+       :where [(tuple ?x ?y) ?location]
+              [?player :player/location ?location]
+              [?player :player/handle ?handle]]
+     db 100 0)
+=> [["Argent Adept"]]
+
+;; unmaking a tuple in query
+(d/q '[:find ?handle ?x ?y
+       :syms handle x y
+       :where [?player :player/location ?location]
+              [?player :player/handle ?handle]
+              [(untuple ?location) [?x ?y]]]
+     db)
+=> [{handle "Nightmist", x 50, y 50}
+    {handle "Argent Adept", x 100, y 0}]
+
