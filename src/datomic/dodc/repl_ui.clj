@@ -205,7 +205,7 @@ by the keys."
            t (max 0 (- (:t db) n))]
        (into
         []
-        (comp (map :tx-data) cat (map #(identify % e->ident)))
+        (comp (map :data) cat (map #(identify % e->ident)))
         (d/tx-range conn {:start (inc t) :end (inc (:t db))})))))
 
 (defn render-and-print

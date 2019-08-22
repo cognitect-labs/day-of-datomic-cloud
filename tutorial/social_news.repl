@@ -8,10 +8,102 @@
 
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
+(import '(java.util UUID))
 
-(def conn (repl/scratch-db-conn "config.edn"))
+;; edit to match your system
+(def client-cfg
+  {:server-type :cloud
+   :region "us-east-1"
+   :system "tomhanks"
+   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
+   :proxy-port 8182})
 
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/social-news.edn"))
+;; Create a client:
+(def client (d/client client-cfg))
+
+;; Create a new database:
+(def db-name (str "social-news-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+
+;; Connect to your new database:
+(def conn (d/connect client {:db-name db-name}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; schema
+
+(def schema
+  [;; stories
+   {:db/ident :story/title
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :story/url
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/unique :db.unique/identity}
+   {:db/ident :story/slug
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+
+   ;; comments
+   {:db/ident :comments
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many
+    :db/isComponent true}
+   {:db/ident :comment/body
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :comment/author
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}
+
+   ;; users
+   {:db/ident :user/firstName
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :user/lastName
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :user/email
+    :db/unique :db.unique/identity
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :user/passwordHash
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :user/upVotes
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}
+
+   ;; publish time
+   {:db/ident :publish/at
+    :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one}])
+
+(d/transact conn {:tx-data schema})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; seed data
+
+(def seed-data
+  [;; stories
+   {:story/title "Teach Yourself Programming in Ten Years"
+    :story/url "http://norvig.com/21-days.html"}
+   {:story/title "Clojure Rationale"
+    :story/url "http://clojure.org/rationale"}
+   {:story/title "Beating the Averages"
+    :story/url "http://www.paulgraham.com/avg.html"}
+
+   ;; users
+   {:user/firstName "Stu"
+    :user/lastName "Halloway"
+    :user/email "stuarthalloway@datomic.com"}
+   {:user/firstName "Ed"
+    :user/lastName "Itor"
+    :user/email "editor@example.com"}])
+
+(d/transact conn {:tx-data seed-data})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; point in time db value
 (def db (d/db conn))
@@ -111,4 +203,5 @@
   (d/q '[:find (pull ?e [:user/email {:user/upVotes [:story/url]}])
          :where [?e :user/email]] (d/db conn)))
 
-(repl/delete-scratch-db conn "config.edn")
+;; Delete the database when finished
+(d/delete-database client {:db-name db-name})

@@ -15,7 +15,7 @@
 (def db-name "mbrainz-1968-1973")
 (def conn (d/connect client {:db-name db-name}))
 (d/db-stats (d/db conn))
-; {:datoms 1093161}
+;; {:datoms 1101457}
 
 (def rules '[[(created-at ?eid ?created-at)
               [?eid :artist/gid _ ?tx]
