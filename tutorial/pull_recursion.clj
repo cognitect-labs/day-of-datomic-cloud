@@ -7,8 +7,13 @@
 ;   You must not remove this notice, or any other, from this software.
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
+(import '(java.util UUID))
 
-(def conn (repl/scratch-db-conn "config.edn"))
+(def client-config (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
+(def db-name (str "scratch-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+(def conn (d/connect client {:db-name db-name}))
 
 ;; define a schema of person entities where each person has a name and friends.
 ;; -- note that the friends are intended to be person entities themselves.
@@ -59,4 +64,4 @@
 (d/pull db '[:person/name {[:person/_friend :as :pals] 1}] anne-id)
 (d/pull db '[:person/name {[:person/_friend :as :pals] ...}] anne-id)
 
-(repl/delete-scratch-db conn "config.edn")
+(d/delete-database client {:db-name db-name})

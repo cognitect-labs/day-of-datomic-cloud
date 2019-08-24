@@ -7,22 +7,20 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
+         '[datomic.samples.repl :as repl]
+         '[clojure.data.generators :as gen])
 (import '(java.util UUID))
 
-;; edit to match your system
-(def client-cfg
-  {:server-type :cloud
-   :region "us-east-1"
-   :system "tomhanks"
-   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
-   :proxy-port 8182})
+;; Define the configuration for your client:
+(def client-cfg (read-string (slurp "config.edn")))
 
 ;; Create a client:
 (def client (d/client client-cfg))
 
-;; Create a new database:
+;; Create a name for your database:
 (def db-name (str "social-news-" (UUID/randomUUID)))
+
+;; Create a new database:
 (d/create-database client {:db-name db-name})
 
 ;; Connect to your new database:
@@ -179,10 +177,28 @@
 ;; all gone
 (d/pull db '[:user/upVotes] john)
 
-(doc repl/gen-users-with-upvotes)
+(defn choose-some
+  "Pick zero or more items at random from a collection"
+  [coll]
+  (take (gen/uniform 0 (count coll))
+        (gen/shuffle coll)))
+
+(defn gen-users-with-upvotes
+  "Make transaction data for example users, possibly with upvotes"
+  [stories email-prefix n]
+  (mapcat
+   (fn [n]
+     (let [user-id (str "new-user-" (UUID/randomUUID))
+           upvotes (map (fn [story] [:db/add user-id :user/upVotes story])
+                        (choose-some stories))]
+       (conj
+        upvotes
+        {:db/id user-id
+         :user/email (str email-prefix "-" n "@example.com")})))
+   (range n)))
 
 (def ten-new-users
-  (repl/gen-users-with-upvotes all-stories "user" 10))
+  (gen-users-with-upvotes all-stories "user" 10))
 
 (d/transact conn {:tx-data ten-new-users})
 

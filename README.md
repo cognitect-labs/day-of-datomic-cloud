@@ -14,7 +14,7 @@ $ brew install clojure
 
 * Clone this repo locally
 
-* Make a copy of the config.edn.example file and edit it, providing your Datomic Cloud connection [configuration information](https://docs.datomic.com/cloud/getting-started/connecting.html#creating-database).
+* Copy config.edn.example to config.edn and edit config.edn, providing your Datomic Cloud connection [configuration information](https://docs.datomic.com/cloud/getting-started/connecting.html#creating-database).
 
 * Make sure you are running a [SOCKS Proxy](https://docs.datomic.com/cloud/getting-started/configuring-access.html#socks-proxy) to your Datomic Cloud Bastion.
 
@@ -26,11 +26,11 @@ $ clj
 Work through some of the tutorials in the tutorial directory,
 evaluating each form at the REPL. You might start with:
 
-* hello_world.clj
-* social_news.clj
-* provenance.clj
-* graph.clj
-* filters.clj
+* hello_world.repl
+* social_news.repl
+* provenance.repl
+* graph.repl
+* filters.repl
 
 ## Study the Samples
 

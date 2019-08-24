@@ -16,34 +16,14 @@
 
 (def resource io/resource)
 
-(def scratch-db-prefix "day-of-datomic-cloud-scratch-")
-
-(defn scratch-db-conn
-  "Create a connection to a scratch database"
-  [cfg-file]
-  (let [cfg (read-string (slurp cfg-file))
-        client (d/client cfg)
-        db-name (str scratch-db-prefix (UUID/randomUUID))]
-    (d/create-database client {:db-name db-name})
-    (d/connect client {:db-name db-name})))
-
-(defn delete-scratch-db
-  [conn cfg-file]
-  "Deletes the scratch db from the provided conn"
-  (let [cfg (read-string (slurp cfg-file))
-        client (d/client cfg)
-        db-name (:db-name conn)]
-    (println "Deleting DB: " db-name)
-    (d/delete-database client {:db-name db-name})))
-
 (defn- delete-all-scratch-dbs
   [cfg-file]
-  "Deletes all DBs with the prefix \"day-of-datomic-cloud-scratch-\""
+  "Deletes all DBs with the prefix \"scratch-\""
   (let [cfg (read-string (slurp cfg-file))
         client (d/client cfg)
         db-names (d/list-databases client {})]
     (doseq [db-name db-names
-            :when (.startsWith db-name scratch-db-prefix)]
+            :when (.startsWith db-name "scratch-")]
       (println "Deleting DB: " db-name)
       (d/delete-database client {:db-name db-name}))))
 
@@ -156,26 +136,6 @@
     (dotimes [_ 4]
       (d/transact conn {:tx-data (generate-some-comments conn (d/db conn) 5)}))
     conn))
-
-(defn choose-some
-  "Pick zero or more items at random from a collection"
-  [coll]
-  (take (gen/uniform 0 (count coll))
-        (gen/shuffle coll)))
-
-(defn gen-users-with-upvotes
-  "Make transaction data for example users, possibly with upvotes"
-  [stories email-prefix n]
-  (mapcat
-    (fn [n]
-      (let [user-id (str "new-user-" (UUID/randomUUID))
-            upvotes (map (fn [story] [:db/add user-id :user/upVotes story])
-                         (choose-some stories))]
-        (conj
-          upvotes
-          {:db/id user-id
-           :user/email (str email-prefix "-" n "@example.com")})))
-    (range n)))
 
 (defn trunc
   "Return a string rep of x, shortened to n chars or less"

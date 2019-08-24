@@ -13,8 +13,8 @@
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
 
-(def cfg (read-string (slurp "config.edn")))
-(def client (d/client cfg))
+(def client-config (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
 (def db-name "mbrainz-1968-1973")
 (def conn (d/connect client {:db-name db-name}))
 (def db (d/db conn))

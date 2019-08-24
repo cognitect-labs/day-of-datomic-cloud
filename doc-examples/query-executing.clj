@@ -11,10 +11,8 @@
 
 (require '[datomic.client.api :as d])
 
-;; Define the configuration for your client:
-(def cfg (read-string (slurp "config.edn")))
-
-(def client (d/client cfg))
+(def client-config (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
 (def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
 (def db (d/db conn))
 

@@ -1,3 +1,11 @@
+;; Copyright (c) Cognitect, Inc. All rights reserved.
+;; The use and distribution terms for this software are covered by the
+;; Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;; which can be found in the file epl-v10.html at the root of this distribution.
+;; By using this software in any fashion, you are agreeing to be bound by
+;; the terms of this license.
+;; You must not remove this notice, or any other, from this software.
+
 (require
  '[clojure.data.csv :as csv]
  '[clojure.edn :as edn]
@@ -8,12 +16,7 @@
 ;; clone git@github.com:zygmuntz/goodbooks-10k.git
 (def repo-dir "goodbooks-10k")
 
-;; set this to point to your own system
-(def client-cfg {:server-type :cloud
-                 :region "us-east-1"
-                 :system "tomhanks"
-                 :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
-                 :proxy-port 8182})
+(def client-config (read-string (slurp "config.edn")))
 
 (set! *print-length* 10)
 
@@ -142,5 +145,3 @@
     (doseq [rows (partition-all 10000 rows)]
       (print ".") (flush)
       (d/transact conn {:tx-data (map row->rating rows)}))))
-
-

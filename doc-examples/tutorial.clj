@@ -7,8 +7,14 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d])
+(import '(java.util UUID))
 
-(def client (d/client cfg))
+(def client-cfg (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
+(def db-name (str "scratch-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+
+(def client (d/client client-cfg))
 (d/create-database client {:db-name "inventory-tutorial"})
 (def conn (d/connect client {:db-name "inventory-tutorial"}))
 

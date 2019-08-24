@@ -1,7 +1,5 @@
 {:server-type :cloud
- :region "<your AWS Region>" ;; e.g. us-east-1
- :system "<your system name>"
- :query-group "<your system name>"
- :endpoint "http://entry.<system-name>.<region>.datomic.net:8182/"
-;; :creds-profile "<AWS Profile Name>" ;; Optional
- :proxy-port <local-port for SSH tunnel to bastion>}
+ :region "us-east-1"
+ :system "day-of-datomic-2019"
+ :endpoint "http://entry.day-of-datomic-2019.us-east-1.datomic.net:8182/"
+ :proxy-port 8182}
