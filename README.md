@@ -26,7 +26,7 @@ $ clj
 Work through some of the tutorials in the tutorial directory,
 evaluating each form at the REPL. You might start with:
 
-* hello_world.clj
+* hello_world.repl
 * social_news.repl
 * provenance.clj
 * graph.clj
