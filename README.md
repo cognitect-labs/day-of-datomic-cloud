@@ -27,7 +27,7 @@ Work through some of the tutorials in the tutorial directory,
 evaluating each form at the REPL. You might start with:
 
 * hello_world.clj
-* social_news.clj
+* social_news.repl
 * provenance.clj
 * graph.clj
 * filters.clj

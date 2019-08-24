@@ -137,26 +137,6 @@
       (d/transact conn {:tx-data (generate-some-comments conn (d/db conn) 5)}))
     conn))
 
-(defn choose-some
-  "Pick zero or more items at random from a collection"
-  [coll]
-  (take (gen/uniform 0 (count coll))
-        (gen/shuffle coll)))
-
-(defn gen-users-with-upvotes
-  "Make transaction data for example users, possibly with upvotes"
-  [stories email-prefix n]
-  (mapcat
-    (fn [n]
-      (let [user-id (str "new-user-" (UUID/randomUUID))
-            upvotes (map (fn [story] [:db/add user-id :user/upVotes story])
-                         (choose-some stories))]
-        (conj
-          upvotes
-          {:db/id user-id
-           :user/email (str email-prefix "-" n "@example.com")})))
-    (range n)))
-
 (defn trunc
   "Return a string rep of x, shortened to n chars or less"
   [x n]
