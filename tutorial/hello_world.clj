@@ -9,10 +9,10 @@
 (require '[datomic.client.api :as d])
 
 ;; Define the configuration for your client:
-(def cfg (read-string (slurp "config.edn")))
+(def client-config (read-string (slurp "config.edn")))
 
 ;; Create a client:
-(def client (d/client cfg))
+(def client (d/client client-cfg))
 
 ;; Create a new database:
 (d/create-database client {:db-name "movies"})
@@ -65,5 +65,3 @@
 
 ;; Delete the movies database when finished
 (d/delete-database client {:db-name "movies"})
-
-

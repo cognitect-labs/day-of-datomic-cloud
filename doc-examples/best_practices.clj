@@ -7,17 +7,14 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d])
-(import 'clojure.lang.ExceptionInfo)
+(import 'clojure.lang.ExceptionInfo
+        'java.util.UUID)
 
-;; Define the configuration for the client:
-(def cfg (read-string (slurp "config.edn")))
-
-;; Create a client:
-(def client (d/client cfg))
-
-;; Create a database and connect to it:
-(d/create-database client {:db-name "best-practices-db"})
-(def conn (d/connect client {:db-name "best-practices-db"}))
+(def client-config (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
+(def db-name (str "scratch-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+(def conn (d/connect client {:db-name db-name}))
 
 (def schema [{:db/ident :account/number
               :db/cardinality :db.cardinality/one
@@ -91,4 +88,4 @@
     first
     :data)
 
-(d/delete-database client {:db-name "best-practices-db"})
+(d/delete-database client {:db-name db-name})

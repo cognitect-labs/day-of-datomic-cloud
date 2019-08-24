@@ -7,13 +7,14 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d])
+(import '(java.util UUID))
 
-;; Define the configuration for your client:
-(def cfg (read-string (slurp "config.edn")))
+(def client-config (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
+(def db-name (str "scratch-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
 
-(def client (d/client cfg))
-(d/create-database client {:db-name "tutorial"})
-(def conn (d/connect client {:db-name "tutorial"}))
+(def conn (d/connect client {:db-name db-name}))
 (def db (d/db conn))
 
 (comment "anomalies")
@@ -94,4 +95,4 @@
                             :inv/color :green}]})
     :tx-data)
 
-(d/delete-database client {:db-name "tutorial"})
+(d/delete-database client {:db-name db-name})

@@ -9,8 +9,14 @@
 (require '[clojure.pprint :as pp]
          '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
+(import '(java.util UUID))
 
-(def conn (repl/scratch-db-conn "config.edn"))
+(def client-config (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
+(def db-name (str "scratch-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+(def conn (d/connect client {:db-name db-name}))
+
 
 (def txes
   [[{:db/id "item/id"
@@ -113,4 +119,4 @@
      (sort-by first)
      pp/pprint)
 
-(repl/delete-scratch-db conn "config.edn")
+(d/delete-database client {:db-name db-name})

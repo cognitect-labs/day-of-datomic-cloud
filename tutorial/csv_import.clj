@@ -3,8 +3,13 @@
          '[clojure.data.csv :as csv]
          '[clojure.edn :as edn]
          '[clojure.java.io :as io])
+(import '(java.util UUID))
 
-(def conn (repl/scratch-db-conn "config.edn"))
+(def client-config (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
+(def db-name (str "scratch-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+(def conn (d/connect client {:db-name db-name}))
 
 @(def csv (with-open [r (io/reader "data/inventory.csv")]
             (into [] (csv/read-csv r))))
@@ -42,4 +47,4 @@
               [?e :inv/count ?count]]
      db)
 
-(repl/delete-scratch-db conn "config.edn")
+(d/delete-database client {:db-name db-name})

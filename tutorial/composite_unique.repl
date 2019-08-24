@@ -12,20 +12,10 @@
 (import
  '[java.util UUID])
 
-;; edit to match your system
-(def client-cfg
-  {:server-type :cloud
-   :region "us-east-1"
-   :system "tomhanks"
-   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
-   :proxy-port 8182})
-
+(def client-config (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
-
 (def db-name (str "course-reg-" (UUID/randomUUID)))
-
 (d/create-database client {:db-name db-name})
-
 (def conn (d/connect client {:db-name db-name}))
 
 (def base-schema

@@ -16,34 +16,14 @@
 
 (def resource io/resource)
 
-(def scratch-db-prefix "day-of-datomic-cloud-scratch-")
-
-(defn scratch-db-conn
-  "Create a connection to a scratch database"
-  [cfg-file]
-  (let [cfg (read-string (slurp cfg-file))
-        client (d/client cfg)
-        db-name (str scratch-db-prefix (UUID/randomUUID))]
-    (d/create-database client {:db-name db-name})
-    (d/connect client {:db-name db-name})))
-
-(defn delete-scratch-db
-  [conn cfg-file]
-  "Deletes the scratch db from the provided conn"
-  (let [cfg (read-string (slurp cfg-file))
-        client (d/client cfg)
-        db-name (:db-name conn)]
-    (println "Deleting DB: " db-name)
-    (d/delete-database client {:db-name db-name})))
-
 (defn- delete-all-scratch-dbs
   [cfg-file]
-  "Deletes all DBs with the prefix \"day-of-datomic-cloud-scratch-\""
+  "Deletes all DBs with the prefix \"scratch-\""
   (let [cfg (read-string (slurp cfg-file))
         client (d/client cfg)
         db-names (d/list-databases client {})]
     (doseq [db-name db-names
-            :when (.startsWith db-name scratch-db-prefix)]
+            :when (.startsWith db-name "scratch-")]
       (println "Deleting DB: " db-name)
       (d/delete-database client {:db-name db-name}))))
 
