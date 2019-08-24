@@ -77,10 +77,7 @@
 (def history (d/history db))
 
 ;; print db as a table
-(->> (d/datoms history {:index :eavt})
-     seq
-     (sort repl/tx-part-e-a-added)
-     (repl/datom-table history))
+(seq (d/datoms history {:index :eavt}))
 
 (def error-txes (set (d/q '[:find ?e
                             :where [?e :tx/error]]

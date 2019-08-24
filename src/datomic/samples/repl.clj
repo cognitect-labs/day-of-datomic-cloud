@@ -161,19 +161,6 @@
         (false? (:added x)) -1
         :default 1))))
 
-(defn datom-table
-  "Print a collection of datoms in an org-mode compatible table."
-  [db datoms]
-  (->> datoms
-       (map
-         (fn [{:keys [e a v t added]}]
-           {"e" (format "0x%016x" e)
-            "a" (:db/ident (d/pull db {:selector '[:db/ident] :eid a}))
-            "v" (trunc v 24)
-            "tx" (format "0x%x" t)
-            "added" added}))
-       (pp/print-table ["e" "a" "v" "tx" "added"])))
-
 (defn root-cause
   [^Throwable x]
   (when x
