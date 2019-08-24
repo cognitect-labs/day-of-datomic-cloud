@@ -28,9 +28,9 @@ evaluating each form at the REPL. You might start with:
 
 * hello_world.repl
 * social_news.repl
-* provenance.clj
-* graph.clj
-* filters.clj
+* provenance.repl
+* graph.repl
+* filters.repl
 
 ## Study the Samples
 

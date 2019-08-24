@@ -11,10 +11,19 @@
          '[clojure.pprint :as pp])
 (import '(java.util UUID))
 
-(def client-config (read-string (slurp "config.edn")))
+;; Define the configuration for your client:
+(def client-cfg (read-string (slurp "config.edn")))
+
+;; Create a client:
 (def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
+
+;; Create a name for your database:
+(def db-name (str "provenance-" (UUID/randomUUID)))
+
+;; Create a new database:
 (d/create-database client {:db-name db-name})
+
+;; Connect to your new database:
 (def conn (d/connect client {:db-name db-name}))
 
 (repl/transact-all conn (repl/resource "day-of-datomic-cloud/social-news.edn"))

@@ -11,12 +11,20 @@
          '[datomic.samples.repl :as repl])
 (import '(java.util UUID))
 
-(def client-config (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+;; Define the configuration for your client:
+(def client-cfg (read-string (slurp "config.edn")))
 
+;; Create a client:
+(def client (d/client client-cfg))
+
+;; Create a name for your database:
+(def db-name (str "graph-" (UUID/randomUUID)))
+
+;; Create a new database:
+(d/create-database client {:db-name db-name})
+
+;; Connect to your new database:
+(def conn (d/connect client {:db-name db-name}))
 
 (def txes
   [[{:db/id "item/id"

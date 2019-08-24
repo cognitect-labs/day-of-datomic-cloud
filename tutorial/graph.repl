@@ -6,17 +6,25 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[clojure.pprint :as pp]
-         '[datomic.client.api :as d]
+(require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
 (import '(java.util UUID))
 
 ;; inspired by http://docs.neo4j.org/chunked/stable/cypher-cookbook-hyperedges.html
 
-(def client-config (read-string (slurp "config.edn")))
+;; Define the configuration for your client:
+(def client-cfg (read-string (slurp "config.edn")))
+
+;; Create a client:
 (def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
+
+;; Create a name for your database:
+(def db-name (str "graph-" (UUID/randomUUID)))
+
+;; Create a new database:
 (d/create-database client {:db-name db-name})
+
+;; Connect to your new database:
 (def conn (d/connect client {:db-name db-name}))
 
 (repl/transact-all conn (repl/resource "day-of-datomic-cloud/graph.edn"))
@@ -33,14 +41,13 @@
      db [:user/name "User1"] [:group/name "Group2"])
 
 ;; find all groups and roles for a user
-(pp/pprint
-  (d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
-         :in $ ?e
-         :where
-         [?e :hasRoleInGroups ?roleInGroup]
-         [?roleInGroup :hasGroups ?group]
-         [?roleInGroup :hasRoles ?role]]
-       db [:user/name "User2"]))
+(d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
+       :in $ ?e
+       :where
+       [?e :hasRoleInGroups ?roleInGroup]
+       [?roleInGroup :hasGroups ?group]
+       [?roleInGroup :hasRoles ?role]]
+     db [:user/name "User2"])
 
 (def rules '[[(user-roles-in-groups ?user ?role ?group)
               [?user :hasRoleInGroups ?roleInGroup]
@@ -48,11 +55,10 @@
               [?roleInGroup :hasRoles ?role]]])
 
 ;; find all groups and roles for a user, using a datalog rulea
-(pp/pprint
-  (d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
-         :in $ % ?user
-         :where (user-roles-in-groups ?user ?role ?group)]
-       db rules [:user/name "User1"]))
+(d/q '[:find (pull ?group [:group/name]) (pull ?role [:role/name])
+       :in $ % ?user
+       :where (user-roles-in-groups ?user ?role ?group)]
+     db rules [:user/name "User1"])
 
 ;; find common groups based on shared roles, counting shared roles
 (d/q '[:find (pull ?group [:group/name]) (count ?role)
