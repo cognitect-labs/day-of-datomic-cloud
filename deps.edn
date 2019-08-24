@@ -9,4 +9,6 @@
  :paths ["src" "tutorial" "doc-examples" "resources"]
  :mvn/repos {"datomic-cloud" {:url "s3://datomic-releases-1fc2183a/maven/releases"}}
  :aliases
- {:dev {:extra-deps {com.datomic/ion-dev {:mvn/version "0.9.231"}}}}}
+ {:dev {:extra-deps {com.datomic/ion-dev {:mvn/version "0.9.231"}}}
+  ;; edit this if you're using a newer version of REBL
+  :rebl {:extra-deps {rebl {:local/root "REBL-0.9.218.jar"}}}}}
