@@ -53,7 +53,8 @@
     columns
     example))
 
-(def client (d/client client-config))
+(def client (d/client client-cfg))
+
 (d/create-database client {:db-name "goodreads-10k"})
 
 (def conn (d/connect client {:db-name "goodreads-10k"}))
@@ -141,7 +142,5 @@
        (doseq [rows (partition-all 10000 rows)]
          (print ".") (flush)
          ;; if you want to be nice to other users on a shared system
-         (Thread/sleep 2000)   
+         (Thread/sleep 2000)
          (d/transact conn {:tx-data (map row->rating rows)}))))))
-
-
