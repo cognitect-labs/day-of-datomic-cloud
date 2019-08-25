@@ -23,6 +23,8 @@
 ;; Get the current db value
 (def db (d/db conn))
 
+(set! *print-length* 100)
+
 ;; correct: "The Beatles" is a data source
 (def query '[:find ?e
              :in $ ?name
