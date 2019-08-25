@@ -14,7 +14,7 @@
 
 ;; data from http://fastml.com/goodbooks-10k
 ;; clone git@github.com:zygmuntz/goodbooks-10k.git
-(def repo-dir "goodbooks-10k")
+(def repo-dir "../goodbooks-10k")
 
 (def client-cfg (read-string (slurp "config.edn")))
 
@@ -53,10 +53,10 @@
     columns
     example))
 
-(def client (d/client client-cfg))
-(d/create-database client {:db-name "goodreads-10k-1"})
+(def client (d/client client-config))
+(d/create-database client {:db-name "goodreads-10k"})
 
-(def conn (d/connect client {:db-name "goodreads-10k-1"}))
+(def conn (d/connect client {:db-name "goodreads-10k"}))
 
 (d/transact conn {:tx-data schema})
 
@@ -78,7 +78,10 @@
      (let [rows (drop 1 (csv/read-csv f))]
        (mapv #(row->entity % schema) rows))))
 
+;; this takes several seconds
 (d/transact conn {:tx-data book-entities})
+
+(d/list-databases client {})
 
 ;; peek at the books data
 (def db (d/db conn))
@@ -90,15 +93,6 @@
         [?book :book/average_rating ?rating]
         [(<= 4.8 ?rating)]]
       db))
-
-(time
- (d/q '[:find ?title ?rating
-        :where
-        [?book :book/average_rating ?rating]
-        [(<= 4.8 ?rating)]
-        [?book :book/title ?title]]
-      db))
-
 
 (d/transact conn {:tx-data [{:db/ident :book/book_id
                              :db/unique :db.unique/identity}]})
@@ -140,8 +134,14 @@
     (with-open [f (io/reader (io/file repo-dir "ratings.csv"))]
       (count (csv/read-csv f)))))
 
-(with-open [f (io/reader (io/file repo-dir "ratings.csv"))]
-  (let [rows (drop 1 (csv/read-csv f))]
-    (doseq [rows (partition-all 10000 rows)]
-      (print ".") (flush)
-      (d/transact conn {:tx-data (map row->rating rows)}))))
+(def result
+  (future
+   (with-open [f (io/reader (io/file repo-dir "ratings.csv"))]
+     (let [rows (drop 1 (csv/read-csv f))]
+       (doseq [rows (partition-all 10000 rows)]
+         (print ".") (flush)
+         ;; if you want to be nice to other users on a shared system
+         (Thread/sleep 2000)   
+         (d/transact conn {:tx-data (map row->rating rows)}))))))
+
+
