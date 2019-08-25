@@ -11,9 +11,16 @@
 
 (require '[datomic.client.api :as d])
 
+;; Define the configuration for your client:
 (def client-cfg (read-string (slurp "config.edn")))
+
+;; Create a client:
 (def client (d/client client-cfg))
+
+;; Connect to the mbrainz database
 (def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
+
+;; Get the current db value
 (def db (d/db conn))
 
 ;; correct: "The Beatles" is a data source

@@ -9,13 +9,17 @@
 (require '[datomic.client.api :as d])
 (import '(java.util UUID))
 
+;; Define the configuration for your client:
 (def client-cfg (read-string (slurp "config.edn")))
+
+;; Create a client:
 (def client (d/client client-cfg))
 
 ;; Create a new database:
 (def db-name (str "raymond-" (UUID/randomUUID)))
 (d/create-database client {:db-name db-name})
 
+;; Connect to your new database:
 (def conn (d/connect client {:db-name db-name}))
 
 (def schema
