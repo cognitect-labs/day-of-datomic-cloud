@@ -12,9 +12,9 @@
  '[clojure.java.io :as io]
  '[datomic.client.api :as d])
 
-;; data from http://fastml.com/goodbooks-10k
-;; clone git@github.com:zygmuntz/goodbooks-10k.git
-(def repo-dir "goodbooks-10k")
+;; This uses data from http://fastml.com/goodbooks-10k.
+;; Assumes you've already imported the dataset.
+;; - see goodbooks-10k-import.repl
 
 (def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
