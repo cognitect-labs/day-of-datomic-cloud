@@ -32,7 +32,7 @@ the nth item from each result tuple."
 ;; compose reducing-fn and transform
 (transduce (nth-counter 2) averager chunks)
 
-(def client-config (read-string (slurp "config.edn")))
+(def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
 (def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
 (def db (d/db conn))

@@ -9,9 +9,11 @@
 (require '[datomic.client.api :as d])
 (import '(java.util UUID))
 
-(def client-config (read-string (slurp "config.edn")))
+;; Define the configuration for your client:
+(def client-cfg (read-string (slurp "config.edn")))
+
 ;; Create a client:
-(def client (d/client cfg))
+(def client (d/client client-cfg))
 
 ;; Create a new database:
 (def db-name (str "movies-" (UUID/randomUUID)))

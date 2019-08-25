@@ -10,13 +10,7 @@
  '[clojure.pprint :as pp]
  '[datomic.client.api :as d])
 
-;; edit to match your system
-(def client-cfg
-  {:server-type :cloud
-   :region "us-east-1"
-   :system "tomhanks"
-   :endpoint "http://entry.bubbagumpshrimp.us-east-1.datomic.net:8182/"
-   :proxy-port 8182})
+(def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
 
 (comment
@@ -71,4 +65,3 @@
      db)
 => [{handle "Nightmist", x 50, y 50}
     {handle "Argent Adept", x 100, y 0}]
-

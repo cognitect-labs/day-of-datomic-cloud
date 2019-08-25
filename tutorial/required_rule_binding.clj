@@ -10,7 +10,7 @@
 
 (require '[datomic.client.api :as d])
 
-(def client-config (read-string (slurp "config.edn")))
+(def client-cfg (read-string (slurp "config.edn")))
 
 (def client (d/client client-cfg))
 (def db-name "mbrainz-1968-1973")

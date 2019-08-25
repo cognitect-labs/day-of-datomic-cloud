@@ -9,7 +9,7 @@
 (require '[datomic.client.api :as d])
 (import '(java.util UUID))
 
-(def client-config (read-string (slurp "config.edn")))
+(def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
 
 ;; Create a new database:

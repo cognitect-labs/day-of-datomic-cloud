@@ -16,7 +16,7 @@
 ;; clone git@github.com:zygmuntz/goodbooks-10k.git
 (def repo-dir "goodbooks-10k")
 
-(def client-config (read-string (slurp "config.edn")))
+(def client-cfg (read-string (slurp "config.edn")))
 
 (set! *print-length* 10)
 

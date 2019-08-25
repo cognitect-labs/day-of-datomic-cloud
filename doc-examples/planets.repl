@@ -6,14 +6,22 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require
- '[clojure.pprint :as pp]
- '[datomic.client.api :as d])
-(import
- '(java.util UUID))
+(require '[clojure.pprint :as pp]
+         '[datomic.client.api :as d])
+(import '(java.util UUID))
 
-(def client-config (read-string (slurp "config.edn")))
+;; Define the configuration for your client:
+(def client-cfg (read-string (slurp "config.edn")))
+
+;; Create a client:
 (def client (d/client client-cfg))
+
+;; Create a new database:
+(def db-name (str "planets-" (UUID/randomUUID)))
+(d/create-database client {:db-name db-name})
+
+;; Connect to your new database:
+(def conn (d/connect client {:db-name db-name}))
 
 ;; "body" per https://en.wikipedia.org/wiki/Astronomical_object
 (def schema
@@ -28,11 +36,6 @@
    {:db/ident :body/satellites
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many}])
-
-;; Create a new database:
-(def db-name (str "planets-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
 
 (d/transact conn {:tx-data schema})
 

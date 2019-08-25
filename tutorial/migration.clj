@@ -11,7 +11,7 @@
          '[datomic.samples.schema :as schema])
 (import '(java.util UUID))
 
-(def client-config (read-string (slurp "config.edn")))
+(def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
 (def db-name (str "scratch-" (UUID/randomUUID)))
 (d/create-database client {:db-name db-name})

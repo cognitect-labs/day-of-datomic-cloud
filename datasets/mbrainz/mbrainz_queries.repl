@@ -9,7 +9,7 @@
 (require '[datomic.client.api :as d])
 (set! *print-length* 25)
 
-(def client-config (read-string (slurp "config.edn")))
+(def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
 (def conn (d/connect client {:db-name "mbrainz-subset-0"}))
 (def db (d/db conn))

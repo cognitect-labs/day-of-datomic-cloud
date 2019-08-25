@@ -8,7 +8,8 @@
 
 (require '[datomic.client.api :as d])
 
-(def client (d/client cfg))
+(def client-cfg (read-string (slurp "config.edn")))
+(def client (d/client client-cfg))
 (d/create-database client {:db-name "inventory-tutorial"})
 (def conn (d/connect client {:db-name "inventory-tutorial"}))
 
