@@ -43,7 +43,7 @@
     :db/cardinality :db.cardinality/one}
 
    ;; comments
-   {:db/ident :comments
+   {:db/ident :news/comments
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many
     :db/isComponent true}
