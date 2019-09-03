@@ -52,9 +52,9 @@
            [?e :person/name ?name]])
 
 @(def lovers (d/q who-loves-raymond (d/db conn)))
-=> [{:db/id 24338789392449612, :person/name "Debra"}
-    {:db/id 68803039619711053, :person/name "Robert"}
-    {:db/id 32211292647325771, :person/name "Ray"}]
+;; => [{:db/id 24338789392449612, :person/name "Debra"}
+;;     {:db/id 68803039619711053, :person/name "Robert"}
+;;     {:db/id 32211292647325771, :person/name "Ray"}]
 
 ;; entity ids are opaque numbers
 @(def entity-ids (mapv :db/id lovers))
