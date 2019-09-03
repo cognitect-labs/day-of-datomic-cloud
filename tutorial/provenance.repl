@@ -108,7 +108,7 @@
 
 (def stu [:user/email "stuarthalloway@datomic.com"])
 
-;; Stu loves to pimp his own blog posts...
+;; Stu loves to promote his own blog posts...
 (def tx-result (d/transact
                  conn
                  {:tx-data
