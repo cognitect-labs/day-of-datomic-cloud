@@ -35,7 +35,7 @@
 
 ;; map return with keywords
 (d/q {:query '[:find ?artist-name ?release-name
-               :strs "artist" "release"
+               :keys :artist/name :release/name
                :where [?release :release/name ?release-name]
                [?release :release/artists ?artist]
                [?artist :artist/name ?artist-name]]
