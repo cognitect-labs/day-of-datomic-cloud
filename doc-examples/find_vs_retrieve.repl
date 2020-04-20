@@ -42,3 +42,9 @@
 (d/q artists-query years-pull db artist-names)
 [[#:artist{:name "Johnny Cash", :startYear 1932, :endYear 2003}]
  [#:artist{:name "The Beatles", :startYear 1957, :endYear 1970}]]
+
+;; or for a downstream consumer that cannot handle keywords
+@(def years-pull-2 (map #(vector % :as (name %)) years-pull))
+(d/q artists-query years-pull-2 db artist-names)
+[[{"name" "Johnny Cash", "startYear" 1932, "endYear" 2003}]
+ [{"name" "The Beatles", "startYear" 1957, "endYear" 1970}]]

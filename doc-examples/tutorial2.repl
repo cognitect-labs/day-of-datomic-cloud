@@ -145,13 +145,11 @@
 
 (def db (d/db conn))
 (d/q
-  {:query '[:find ?sku ?count
+  {:query '[:find (pull ?inv [:inv/sku :inv/count])
             :where
-            [?inv :inv/sku ?sku]
             [?inv :inv/count ?count]]
    :args [db]})
-;=> [["SKU-42" 1000] ["SKU-21" 7]]
-
+;=> [[#:inv{:sku "SKU-42", :count 1000}] [#:inv{:sku "SKU-21", :count 7}]]
 
 (d/q
   '[:find (max 3 ?tx)

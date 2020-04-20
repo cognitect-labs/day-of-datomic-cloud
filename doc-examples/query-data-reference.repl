@@ -55,24 +55,24 @@
                :where [?e :artist/name "The Beatles"]]
       :args [db]})
 
-(d/q {:query '[:find ?name ?duration
+(defn names
+  "Make a pull expression that returns unqualified kws for ks"
+  [& ks]
+  (map #(vector % :as (-> % name keyword)) ks))
+
+(d/q {:query '[:find (pull ?track details)
+               :in $ details
                :where
                [?e :artist/name "The Beatles"]
                [?track :track/artists ?e]
                [?track :track/name ?name]
                [?track :track/duration ?duration]]
-      :args [db]})
+      :args [db (names :track/name :track/duration)]})
 
-(d/q {:query '[:find (pull ?e [:artist/startYear :artist/endYear])
-               :in $ ?name
+(d/q {:query '[:find (pull ?e details)
+               :in $ ?name details
                :where [?e :artist/name ?name]]
-      :args [db "The Beatles"]})
-
-(d/q {:query '[:find (pull ?e pattern)
-               :in $ ?name pattern
-               :where [?e :artist/name ?name]]
-      :args [db "The Beatles" [:artist/startYear :artist/endYear]]})
-
+      :args [db "The Beatles" (names :artist/startYear :artist/endYear)]})
 
 (d/q {:query '[:find ?e ?tx ?op
                :in $mbrainz
