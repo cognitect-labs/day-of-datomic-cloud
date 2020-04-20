@@ -42,9 +42,9 @@
 
 @(def db (d/db conn))
 
-(d/q '[:find ?sku ?count
-       :where [?e :inv/sku ?sku]
-              [?e :inv/count ?count]]
+(d/q '[:find (pull ?e [[:inv/sku :as "sku"]
+                       [:inv/count :as "count" :default 0]])
+       :where [?e :inv/sku ?sku]]
      db)
 
 (d/delete-database client {:db-name db-name})
