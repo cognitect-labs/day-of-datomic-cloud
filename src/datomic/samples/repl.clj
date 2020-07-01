@@ -121,7 +121,7 @@
               [:db/add comment-id :comment/body "blah"]]))
          (repeatedly n)
          (mapcat identity))))
-;
+
 (defn setup-sample-db-1
   [conn]
   (doseq [schema ["day-of-datomic-cloud/social-news.edn"

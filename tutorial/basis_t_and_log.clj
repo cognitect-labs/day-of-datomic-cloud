@@ -6,20 +6,10 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl]
-         '[clojure.pprint :as pp])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/social-news.edn"))
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/provenance.edn"))
-
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "social-news"}))
 (def db (d/db conn))
 
 ;; basis-t is t of most recent transaction
@@ -37,4 +27,3 @@
 (-> (d/tx-range conn {:start latest-tx :end (inc latest-tx)})
     first :data count)
 
-(d/delete-database client {:db-name db-name})

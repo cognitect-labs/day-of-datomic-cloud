@@ -11,42 +11,36 @@
 
 ;; get connected
 (require '[datomic.client.api :as d])
-
-;; Define the configuration for your client:
-(def client-cfg (read-string (slurp "config.edn")))
-
-;; Create a client:
-(def client (d/client client-cfg))
-
-;; Connect to the mbrainz database
-(def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
-
-;; Get the current db value
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "mbrainz-subset"}))
 (def db (d/db conn))
+
 
 (set! *print-length* 100)
 
 ;; entities used in pull examples
-(def led-zeppelin [:artist/gid #uuid "678d88b2-87b0-403b-b63d-5da7465aecc3"])
-(def mccartney [:artist/gid #uuid "ba550d0e-adac-4864-b88b-407cab5e76af"])
-(def dark-side-of-the-moon [:release/gid #uuid "24824319-9bb8-3d1e-a2c5-b8b864dafd1b"])
-(def dylan-harrison-sessions [:release/gid #uuid "67bbc160-ac45-4caf-baae-a7e9f5180429"])
-(def dylan-harrison-cd (ffirst (d/q '[:find ?medium
-                                      :in $ ?release
-                                      :where
-                                      [?release :release/media ?medium]]
-                                    db
-                                    (java.util.ArrayList. dylan-harrison-sessions))))
-(def ghost-riders (ffirst (d/q '[:find ?track
-                                 :in $ ?release ?trackno
-                                 :where
-                                 [?release :release/media ?medium]
-                                 [?medium :medium/tracks ?track]
-                                 [?track :track/position ?trackno]]
-                               db
-                               dylan-harrison-sessions
-                               11)))
-(def concert-for-bangla-desh [:release/gid #uuid "f3bdff34-9a85-4adc-a014-922eef9cdaa5"])
+(do
+  (def led-zeppelin [:artist/gid #uuid "678d88b2-87b0-403b-b63d-5da7465aecc3"])
+  (def mccartney [:artist/gid #uuid "ba550d0e-adac-4864-b88b-407cab5e76af"])
+  (def dark-side-of-the-moon [:release/gid #uuid "24824319-9bb8-3d1e-a2c5-b8b864dafd1b"])
+  (def dylan-harrison-sessions [:release/gid #uuid "67bbc160-ac45-4caf-baae-a7e9f5180429"])
+  (def dylan-harrison-cd (ffirst (d/q '[:find ?medium
+                                        :in $ ?release
+                                        :where
+                                        [?release :release/media ?medium]]
+                                      db
+                                      (java.util.ArrayList. dylan-harrison-sessions))))
+  (def ghost-riders (ffirst (d/q '[:find ?track
+                                   :in $ ?release ?trackno
+                                   :where
+                                   [?release :release/media ?medium]
+                                   [?medium :medium/tracks ?track]
+                                   [?track :track/position ?trackno]]
+                                 db
+                                 dylan-harrison-sessions
+                                 11)))
+  (def concert-for-bangla-desh [:release/gid #uuid "f3bdff34-9a85-4adc-a014-922eef9cdaa5"]))
 
 ;; attribute name
 (d/pull db [:artist/name :artist/startYear] led-zeppelin)

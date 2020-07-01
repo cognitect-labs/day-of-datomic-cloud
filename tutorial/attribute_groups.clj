@@ -6,17 +6,10 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/social-news.edn"))
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "social-news"}))
 (def db (d/db conn))
 
 ;; find all attributes in the story namespace
@@ -45,11 +38,9 @@
      db rules)
 
 ;; find all entities possessing *any* story attribute
-(d/q '[:find ?e
+(d/q '[:find (pull ?e [*])
        :in $ %
        :where
        (attr-in-namespace ?a "story")
        [?e ?a]]
      db rules)
-
-(d/delete-database client {:db-name db-name})

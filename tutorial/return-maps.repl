@@ -6,19 +6,10 @@
 ;; the terms of this license.
 ;; You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d])
-(import '(java.util UUID))
-
-;; Define the configuration for your client:
-(def client-cfg (read-string (slurp "config.edn")))
-
-;; Create a client:
-(def client (d/client client-cfg))
-
 ;; Connect to the mbrainz database
-(def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
-
-;; Get a db from the connection
+(require '[datomic.client.api :as d])
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "mbrainz-subset"}))
 (def db (d/db conn))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
