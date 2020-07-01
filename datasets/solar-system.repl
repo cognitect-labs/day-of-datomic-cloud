@@ -1,0 +1,70 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require '[datomic.client.api :as d])
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(d/create-database client {:db-name "solar-system"})
+(def conn (d/connect client {:db-name "solar-system"}))
+
+(def schema
+  [{:db/ident :object/name
+    :db/doc "Name of a Solar System object."
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :object/meanRadius
+    :db/doc "Mean radius of an object."
+    :db/valueType :db.type/double
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :data/source
+    :db/doc "Source of the data in a transaction."
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}])
+
+(d/transact conn {:tx-data schema})
+
+(def data
+  [{:db/doc "Solar system objects bigger than Pluto."
+    :data/source "http://en.wikipedia.org/wiki/List_of_Solar_System_objects_by_size"}
+   {:object/name "Sun"
+    :object/meanRadius 696000.0}
+   {:object/name "Jupiter"
+    :object/meanRadius 69911.0}
+   {:object/name "Saturn"
+    :object/meanRadius 58232.0}
+   {:object/name "Uranus"
+    :object/meanRadius 25362.0}
+   {:object/name "Neptune"
+    :object/meanRadius 24622.0}
+   {:object/name "Earth"
+    :object/meanRadius 6371.0}
+   {:object/name "Venus"
+    :object/meanRadius 6051.8}
+   {:object/name "Mars"
+    :object/meanRadius 3390.0}
+   {:object/name "Ganymede"
+    :object/meanRadius 2631.2}
+   {:object/name "Titan"
+    :object/meanRadius 2576.0}
+   {:object/name "Mercury"
+    :object/meanRadius 2439.7}
+   {:object/name "Callisto"
+    :object/meanRadius 2410.3}
+   {:object/name "Io"
+    :object/meanRadius 1821.5}
+   {:object/name "Moon"
+    :object/meanRadius 1737.1}
+   {:object/name "Europa"
+    :object/meanRadius 1561.0}
+   {:object/name "Triton"
+    :object/meanRadius 1353.4}
+   {:object/name "Eris"
+    :object/meanRadius 1163.0}])
+
+(d/transact conn {:tx-data data})
+
