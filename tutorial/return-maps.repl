@@ -1,0 +1,61 @@
+;; Copyright (c) Cognitect, Inc. All rights reserved.
+;; The use and distribution terms for this software are covered by the
+;; Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;; which can be found in the file epl-v10.html at the root of this distribution.
+;; By using this software in any fashion, you are agreeing to be bound by
+;; the terms of this license.
+;; You must not remove this notice, or any other, from this software.
+
+(require '[datomic.client.api :as d])
+(import '(java.util UUID))
+
+;; Define the configuration for your client:
+(def client-cfg (read-string (slurp "config.edn")))
+
+;; Create a client:
+(def client (d/client client-cfg))
+
+;; Connect to the mbrainz database
+(def conn (d/connect client {:db-name "mbrainz-1968-1973"}))
+
+;; Get a db from the connection
+(def db (d/db conn))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; use find to use the database's structure and attribute keys
+
+(d/q {:query '[:find (pull ?release [:release/name
+                                     {:release/artists [:artist/name]}])
+               :where [?release :release/name]]
+      :args [db]
+      :limit 10})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; use return maps to customize the structure and map keys
+
+;; map return with keywords
+(d/q {:query '[:find ?artist-name ?release-name
+               :keys :artist/name :release/name
+               :where [?release :release/name ?release-name]
+               [?release :release/artists ?artist]
+               [?artist :artist/name ?artist-name]]
+      :args [db]
+      :limit 10})
+
+;; map return with strings
+(d/q {:query '[:find ?artist-name ?release-name
+               :strs "Artist Name" "Release Name"
+               :where [?release :release/name ?release-name]
+               [?release :release/artists ?artist]
+               [?artist :artist/name ?artist-name]]
+      :args [db]
+      :limit 10})
+
+;; map return with symbols
+(d/q {:query '[:find ?artist-name ?release-name
+               :syms Artist Release
+               :where [?release :release/name ?release-name]
+               [?release :release/artists ?artist]
+               [?artist :artist/name ?artist-name]]
+      :args [db]
+      :limit 10})

@@ -43,7 +43,7 @@
     :db/cardinality :db.cardinality/one}
 
    ;; comments
-   {:db/ident :comments
+   {:db/ident :news/comments
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many
     :db/isComponent true}
@@ -80,9 +80,9 @@
 (d/transact conn {:tx-data schema})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; seed data
+;; data
 
-(def seed-data
+(def data
   [;; stories
    {:story/title "Teach Yourself Programming in Ten Years"
     :story/url "http://norvig.com/21-days.html"}
@@ -99,7 +99,7 @@
     :user/lastName "Itor"
     :user/email "editor@example.com"}])
 
-(d/transact conn {:tx-data seed-data})
+(d/transact conn {:tx-data data})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

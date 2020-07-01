@@ -6,11 +6,8 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require
- '[clojure.pprint :as pp]
- '[datomic.client.api :as d])
-(import
- '[java.util UUID])
+(require '[datomic.client.api :as d])
+(import '[java.util UUID])
 
 (def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
@@ -35,11 +32,6 @@
    {:db/ident :semester/season
     :db/valueType :db.type/keyword
     :db/cardinality :db.cardinality/one}
-   {:db/ident :semester/year+season
-    :db/valueType :db.type/tuple
-    :db/tupleAttrs [:semester/year :semester/season]
-    :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity}
    {:db/ident :course/id
     :db/valueType :db.type/string
     :db/unique :db.unique/identity
@@ -64,7 +56,12 @@
 (d/transact conn {:tx-data registration-schema})
 
 (def tuple-schema
-  [{:db/ident :reg/course+semester+student
+  [{:db/ident :semester/year+season
+    :db/valueType :db.type/tuple
+    :db/tupleAttrs [:semester/year :semester/season]
+    :db/cardinality :db.cardinality/one
+    :db/unique :db.unique/identity}
+   {:db/ident :reg/course+semester+student
     :db/valueType :db.type/tuple
     :db/tupleAttrs [:reg/course :reg/semester :reg/student]
     :db/cardinality :db.cardinality/one

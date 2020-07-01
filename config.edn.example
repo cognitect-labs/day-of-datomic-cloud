@@ -2,4 +2,5 @@
  :region "us-east-1"
  :system "day-of-datomic-2019"
  :endpoint "http://entry.day-of-datomic-2019.us-east-1.datomic.net:8182/"
+ :creds-profile "day-of-datomic-2019"
  :proxy-port 8182}

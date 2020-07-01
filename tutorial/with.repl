@@ -6,17 +6,37 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
+(require '[datomic.client.api :as d])
 (import '(java.util UUID))
 
 (def client-cfg (read-string (slurp "config.edn")))
 (def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
+(def db-name (str "monsters-" (UUID/randomUUID)))
 (d/create-database client {:db-name db-name})
 (def conn (d/connect client {:db-name db-name}))
 
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/monsters.edn"))
+(def schema
+  [{:db/ident         :monster/name
+    :db/unique        :db.unique/identity
+    :db/valueType     :db.type/string
+    :db/cardinality   :db.cardinality/one}
+   {:db/ident         :monster/heads
+    :db/valueType     :db.type/long
+    :db/cardinality   :db.cardinality/one}])
+
+(d/transact conn {:tx-data schema})
+
+(def data
+  [{:monster/name "Cerberus"
+    :monster/heads 3}
+   {:monster/name "Medusa"
+    :monster/heads 1}
+   {:monster/name "Cyclops"
+    :monster/heads 1}
+   {:monster/name "Chimera"
+    :monster/heads 1}])
+
+(d/transact conn {:tx-data data})
 
 (def db (d/db conn))
 
