@@ -3,13 +3,10 @@
          '[clojure.data.csv :as csv]
          '[clojure.edn :as edn]
          '[clojure.java.io :as io])
-(import '(java.util UUID))
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "csv-import"})
+(def conn (d/connect client {:db-name "csv-import"}))
 
 @(def csv (with-open [r (io/reader "data/inventory.csv")]
             (into [] (csv/read-csv r))))
@@ -40,11 +37,10 @@
 
 (d/transact conn {:tx-data (map convert-row rows)})
 
-@(def db (d/db conn))
+(def db (d/db conn))
 
 (d/q '[:find (pull ?e [[:inv/sku :as "sku"]
                        [:inv/count :as "count" :default 0]])
        :where [?e :inv/sku ?sku]]
      db)
 
-(d/delete-database client {:db-name db-name})

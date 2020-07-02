@@ -8,14 +8,10 @@
 
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "crud"})
+(def conn (d/connect client {:db-name "crud"}))
 
 ;; attribute schema for :crud/name
 (d/transact
@@ -24,8 +20,7 @@
    [{:db/ident :crud/name
      :db/valueType :db.type/string
      :db/unique :db.unique/identity
-     :db/cardinality :db.cardinality/one
-     :db.install/_attribute :db.part/db}]})
+     :db/cardinality :db.cardinality/one}]})
 
 ;; create, get point-in-time-value
 (def db-after-create
@@ -67,4 +62,3 @@
      (sort-by :tx)
      (pp/print-table [:e :a :v :tx :op]))
 
-(d/delete-database client {:db-name db-name})

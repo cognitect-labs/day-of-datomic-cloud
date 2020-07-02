@@ -1,0 +1,9 @@
+(require '[datomic.client.api :as d]
+         '[datomic.samples.repl :as repl])
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(d/create-database client {:db-name "social-news"})
+(def conn (d/connect client {:db-name "social-news"}))
+
+(repl/transact-all conn (repl/resource "day-of-datomic-cloud/social-news.edn"))
+(repl/transact-all conn (repl/resource "day-of-datomic-cloud/provenance.edn"))
+
