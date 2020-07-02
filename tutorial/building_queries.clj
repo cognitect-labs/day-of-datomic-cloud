@@ -6,47 +6,38 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/social-news.edn"))
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "social-news"}))
+(def db (d/with-db conn))
 
 ;; some St*rts
-(d/transact conn {:tx-data [{:user/firstName "Stewart"
-                             :user/lastName "Brand"}
-                            {:user/firstName "John"
-                             :user/lastName "Stewart"}
-                            {:user/firstName "Stuart"
-                             :user/lastName "Smalley"}
-                            {:user/firstName "Stuart"
-                             :user/lastName "Halloway"}]})
-
-;; database point-in-time value
-(def db (d/db conn))
+(def db (:db-after (d/with db {:tx-data [{:user/firstName "Stewart"
+                                          :user/lastName "Brand"}
+                                         {:user/firstName "John"
+                                          :user/lastName "Stewart"}
+                                         {:user/firstName "Stuart"
+                                          :user/lastName "Smalley"}
+                                         {:user/firstName "Stuart"
+                                          :user/lastName "Halloway"}]})))
 
 ;; find all the Stewart first names
-(d/q '[:find ?e
+(d/q '[:find (pull ?e [*])
        :in $ ?name
        :where [?e :user/firstName ?name]]
      db
      "Stewart")
 
 ;; find all the Stewart or Stuart first names
-(d/q '[:find ?e
+(d/q '[:find (pull ?e [*])
        :in $ [?name ...]
        :where [?e :user/firstName ?name]]
      db
      ["Stewart" "Stuart"])
 
 ;; find all the Stewart/Stuart as either first name or last name
-(d/q '[:find ?e
+(d/q '[:find (pull ?e [*])
        :in $ [?name ...] [?attr ...]
        :where [?e ?attr ?name]]
      db
@@ -69,4 +60,3 @@
                        [?e :user/lastName ?lname]]}
       :args [db "Stuart" "Smalley"]})
 
-(d/delete-database client {:db-name db-name})
