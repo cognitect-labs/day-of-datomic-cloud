@@ -7,15 +7,11 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+         '[clojure.pprint :as pp])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "crud"})
+(def conn (d/connect client {:db-name "crud"}))
 
 ;; attribute schema for :crud/name
 (d/transact
@@ -57,7 +53,7 @@
 
 ;; but everything ever said is still there
 (def history (d/history db-after-delete))
-(require '[clojure.pprint :as pp])
+
 (->> (d/q '[:find ?e ?a ?v ?tx ?op
             :in $
             :where [?e :crud/name "Hello world"]
@@ -66,5 +62,3 @@
      (map #(zipmap [:e :a :v :tx :op] %))
      (sort-by :tx)
      (pp/print-table [:e :a :v :tx :op]))
-
-(d/delete-database client {:db-name db-name})

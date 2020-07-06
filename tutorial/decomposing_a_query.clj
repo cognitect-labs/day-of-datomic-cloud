@@ -5,15 +5,12 @@
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+(require '[datomic.client.api :as d])
+
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "decomposing-a-query"})
+(def conn (d/connect client {:db-name "decomposing-a-query"}))
 
 (set! *print-length* 100)
 
@@ -69,7 +66,7 @@
                             [?e1 :a ?eid]]
                    :args [db ten]
                    :timeout 10000})))
-;; ~4 seconds, 1200 results
+;; ~5 seconds, 1200 results
 
 ;; Drop another clause
 (time (count (d/q {:query '[:find ?e1 ?e2
@@ -79,7 +76,7 @@
                             [?e2 :a ?v2]]
                    :args [db]
                    :timeout 30000})))
-;; 77 seconds, 1,440,000 results
+;; 7 seconds, 1,440,000 results
 
 
 ;; You may need to adjust :find to remove variables no longer in the query
@@ -128,5 +125,3 @@
                :where [?e2 :a ?e1]]
       :args [db ten]
       :timeout 10000})
-
-(d/delete-database client {:db-name db-name})
