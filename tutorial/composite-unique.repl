@@ -7,82 +7,26 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d])
-(import '[java.util UUID])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "course-reg-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
-(def base-schema
-  [{:db/ident :student/first
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :student/last
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :student/email
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity}
-   {:db/ident :semester/year
-    :db/valueType :db.type/long
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :semester/season
-    :db/valueType :db.type/keyword
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :course/id
-    :db/valueType :db.type/string
-    :db/unique :db.unique/identity
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :course/name
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}])
-
-(d/transact conn {:tx-data base-schema})
-
-(def registration-schema
-  [{:db/ident :reg/course
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :reg/semester
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :reg/student
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one}])
-
-(d/transact conn {:tx-data registration-schema})
-
-(def tuple-schema
-  [{:db/ident :semester/year+season
-    :db/valueType :db.type/tuple
-    :db/tupleAttrs [:semester/year :semester/season]
-    :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity}
-   {:db/ident :reg/course+semester+student
-    :db/valueType :db.type/tuple
-    :db/tupleAttrs [:reg/course :reg/semester :reg/student]
-    :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity}])
-
-(d/transact conn {:tx-data tuple-schema})
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "course-reg"}))
 
 ;; add a semester, course, and student
-(d/transact conn {:tx-data [{:semester/year 2018
-                             :semester/season :fall}
-                            {:course/id "BIO-101"}
-                            {:student/first "John"
-                             :student/last "Doe"
-                             :student/email "johndoe@university.edu"}]})
+(def db (-> (d/with-db conn)
+            (d/with {:tx-data [{:semester/year 2018
+                                :semester/season :fall}
+                               {:course/id "BIO-101"}
+                               {:student/first "John"
+                                :student/last "Doe"
+                                :student/email "johndoe@university.edu"}]})
+            :db-after))
 
 ;; register for the course
-(d/transact conn {:tx-data [{:reg/course [:course/id "BIO-101"]
-                             :reg/semester [:semester/year+season [2018 :fall]]
-                             :reg/student [:student/email "johndoe@university.edu"]}]})
+(def db-2 (-> db
+              (d/with {:tx-data [{:reg/course [:course/id "BIO-101"]
+                                  :reg/semester [:semester/year+season [2018 :fall]]
+                                  :reg/student [:student/email "johndoe@university.edu"]}]})
+              :db-after))
 
 (def pull-pattern '[*
                     {:reg/course [*]}
@@ -93,26 +37,24 @@
 (d/q '[:find (pull ?e pull-pattern?)
        :in $ pull-pattern?
        :where [?e :reg/course+semester+student]]
-     (d/db conn)
+     db-2
      pull-pattern)
 
 ;; Note that datomic added the :reg/course+semester+student attribute
 
 ;; Now unregister by retracting the parts of the tuple
-(let [reg-id (->> (d/q '[:find ?e
-                         :where [?e :reg/course+semester+student]]
-                       (d/db conn))
-                  ffirst)]
-  (d/transact conn {:tx-data
-                    [[:db/retract reg-id :reg/course [:course/id "BIO-101"]]
-                     [:db/retract reg-id :reg/semester [:semester/year+season [2018 :fall]]]
-                     [:db/retract reg-id :reg/student [:student/email "johndoe@university.edu"]]]}))
+(def db-3 (-> (let [reg-id (->> (d/q '[:find ?e
+                                       :where [?e :reg/course+semester+student]]
+                                     db-2)
+                                ffirst)]
+                (d/with db-2 {:tx-data
+                              [[:db/retract reg-id :reg/course [:course/id "BIO-101"]]
+                               [:db/retract reg-id :reg/semester [:semester/year+season [2018 :fall]]]
+                               [:db/retract reg-id :reg/student [:student/email "johndoe@university.edu"]]]}))
+              :db-after))
 
 ;; retracting all of the parts also causes the Datomic to retract the composite
 (d/q '[:find (pull ?e [*])
        :where [?e :reg/course+semester+student]]
-     (d/db conn))
+     db-3)
 ;; []
-
-;; clean up
-(d/delete-database client {:db-name db-name})
