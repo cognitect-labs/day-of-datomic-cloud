@@ -6,17 +6,12 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "social-news"}))
 
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/social-news.edn"))
 (def db (d/db conn))
 
 ;; find the idents of all schema elements in the system
@@ -61,5 +56,3 @@
              [_ :db.install/attribute ?e]
              [?e :db/cardinality :db.cardinality/many]]
            db))
-
-(d/delete-database client {:db-name db-name})
