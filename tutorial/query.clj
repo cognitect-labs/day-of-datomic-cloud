@@ -13,10 +13,9 @@
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name "mbrainz-1968-1973")
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "mbrainz-subset"}))
 (def db (d/db conn))
 (set! *print-length* 100)
 
