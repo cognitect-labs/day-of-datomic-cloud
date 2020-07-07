@@ -8,19 +8,26 @@
 
 (require '[datomic.client.api :as d])
 
-(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
-(def conn (d/connect client {:db-name "social-news"}))
-(def db (d/with-db conn))
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "building-queries"})
+(def conn (d/connect client {:db-name "building-queries"}))
+
+(d/transact conn {:tx-data [{:db/ident :user/firstName
+                             :db/valueType :db.type/string
+                             :db/cardinality :db.cardinality/one}
+                            {:db/ident :user/lastName
+                             :db/valueType :db.type/string
+                             :db/cardinality :db.cardinality/one}]})
 
 ;; some St*rts
-(def db (:db-after (d/with db {:tx-data [{:user/firstName "Stewart"
-                                          :user/lastName "Brand"}
-                                         {:user/firstName "John"
-                                          :user/lastName "Stewart"}
-                                         {:user/firstName "Stuart"
-                                          :user/lastName "Smalley"}
-                                         {:user/firstName "Stuart"
-                                          :user/lastName "Halloway"}]})))
+(d/transact conn {:tx-data [{:user/firstName "Stewart"
+                             :user/lastName "Brand"}
+                            {:user/firstName "John"
+                             :user/lastName "Stewart"}
+                            {:user/firstName "Stuart"
+                             :user/lastName "Smalley"}
+                            {:user/firstName "Stuart"
+                             :user/lastName "Halloway"}]})
 
 ;; find all the Stewart first names
 (d/q '[:find (pull ?e [*])
@@ -59,4 +66,3 @@
                :where [[?e :user/firstName ?fname]
                        [?e :user/lastName ?lname]]}
       :args [db "Stuart" "Smalley"]})
-
