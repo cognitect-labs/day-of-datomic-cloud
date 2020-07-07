@@ -7,69 +7,10 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[clojure.pprint :as pp]
-         '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+         '[datomic.client.api :as d])
 
-;; Define the configuration for your client:
-(def client-cfg (read-string (slurp "config.edn")))
-
-;; Create a client:
-(def client (d/client client-cfg))
-
-;; Create a name for your database:
-(def db-name (str "graph-" (UUID/randomUUID)))
-
-;; Create a new database:
-(d/create-database client {:db-name db-name})
-
-;; Connect to your new database:
-(def conn (d/connect client {:db-name db-name}))
-
-(def txes
-  [[{:db/id "item/id"
-     :db/ident :item/id
-     :db/valueType :db.type/string
-     :db/cardinality :db.cardinality/one
-     :db/unique :db.unique/identity
-     :db.install/_attribute :db.part/db}
-    {:db/id "item/description"
-     :db/ident :item/description
-     :db/valueType :db.type/string
-     :db/cardinality :db.cardinality/one
-     :db.install/_attribute :db.part/db}
-    {:db/id "item/count"
-     :db/ident :item/count
-     :db/valueType :db.type/long
-     :db/cardinality :db.cardinality/one
-     :db.install/_attribute :db.part/db}
-    {:db/id "tx/error"
-     :db/ident :tx/error
-     :db/valueType :db.type/boolean
-     :db/cardinality :db.cardinality/one
-     :db.install/_attribute :db.part/db}
-    {:db/txInstant #inst "2012"}]
-   [{:db/id "DLC-042"
-     :item/id "DLC-042"
-     :item/description "Dilitihium Crystals"
-     :item/count 100}
-    {:db/txInstant #inst "2013-01"}]
-   [{:item/id "DLC-042"
-     :item/count 250}
-    {:db/txInstant #inst "2013-02"}]
-   [{:item/id "DLC-042"
-     :item/count 50}
-    {:db/txInstant #inst "2014-02-28"}]
-   [{:item/id "DLC-042"
-     :item/count 9999}
-    {:db/txInstant #inst "2014-04-01"
-     :tx/error true}]
-   [{:item/id "DLC-042"
-     :item/count 100}
-    {:db/txInstant #inst "2014-05-15"}]])
-
-(doseq [tx txes]
-  (d/transact conn {:tx-data tx}))
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "dilithium-crystals"}))
 
 (def db (d/db conn))
 (def as-of-eoy-2013 (d/as-of db #inst "2014-01-01"))
@@ -123,5 +64,3 @@
           history [:item/id "DLC-042"])
      (sort-by first)
      pp/pprint)
-
-(d/delete-database client {:db-name db-name})

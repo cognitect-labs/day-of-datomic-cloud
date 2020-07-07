@@ -1,0 +1,59 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require '[datomic.client.api :as d])
+
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(d/create-database client {:db-name "dilithium-crystals"})
+(def conn (d/connect client {:db-name "dilithium-crystals"}))
+
+(def txes
+  [[{:db/id "item/id"
+     :db/ident :item/id
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db/unique :db.unique/identity
+     :db.install/_attribute :db.part/db}
+    {:db/id "item/description"
+     :db/ident :item/description
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/id "item/count"
+     :db/ident :item/count
+     :db/valueType :db.type/long
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/id "tx/error"
+     :db/ident :tx/error
+     :db/valueType :db.type/boolean
+     :db/cardinality :db.cardinality/one
+     :db.install/_attribute :db.part/db}
+    {:db/txInstant #inst "2012"}]
+   [{:db/id "DLC-042"
+     :item/id "DLC-042"
+     :item/description "Dilitihium Crystals"
+     :item/count 100}
+    {:db/txInstant #inst "2013-01"}]
+   [{:item/id "DLC-042"
+     :item/count 250}
+    {:db/txInstant #inst "2013-02"}]
+   [{:item/id "DLC-042"
+     :item/count 50}
+    {:db/txInstant #inst "2014-02-28"}]
+   [{:item/id "DLC-042"
+     :item/count 9999}
+    {:db/txInstant #inst "2014-04-01"
+     :tx/error true}]
+   [{:item/id "DLC-042"
+     :item/count 100}
+    {:db/txInstant #inst "2014-05-15"}]])
+
+(doseq [tx txes]
+  (d/transact conn {:tx-data tx}))
