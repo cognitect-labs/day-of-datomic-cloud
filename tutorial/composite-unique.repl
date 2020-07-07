@@ -6,55 +6,55 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d])
+(require '[datomic.client.api :as d]
+         '[datomic.samples.repl :as repl])
 
-(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "course-reg"})
 (def conn (d/connect client {:db-name "course-reg"}))
+(repl/transact-all conn (repl/resource "day-of-datomic-cloud/course-registration.edn"))
 
 ;; add a semester, course, and student
-(def db (-> (d/with-db conn)
-            (d/with {:tx-data [{:semester/year 2018
-                                :semester/season :fall}
-                               {:course/id "BIO-101"}
-                               {:student/first "John"
-                                :student/last "Doe"
-                                :student/email "johndoe@university.edu"}]})
-            :db-after))
+(d/transact conn {:tx-data [{:semester/year 2018
+                             :semester/season :fall}
+                            {:course/id "BIO-101"}
+                            {:student/first "John"
+                             :student/last "Doe"
+                             :student/email "johndoe@university.edu"}]})
 
 ;; register for the course
-(def db-2 (-> db
-              (d/with {:tx-data [{:reg/course [:course/id "BIO-101"]
-                                  :reg/semester [:semester/year+season [2018 :fall]]
-                                  :reg/student [:student/email "johndoe@university.edu"]}]})
-              :db-after))
+(d/transact conn {:tx-data [{:reg/course [:course/id "BIO-101"]
+                             :reg/semester [:semester/year+season [2018 :fall]]
+                             :reg/student [:student/email "johndoe@university.edu"]}]})
 
 (def pull-pattern '[*
                     {:reg/course [*]}
                     {:reg/semester [*]}
                     {:reg/year+season [*]}])
 
+(def db (d/db conn))
+
 ;; find all registrations
 (d/q '[:find (pull ?e pull-pattern?)
        :in $ pull-pattern?
        :where [?e :reg/course+semester+student]]
-     db-2
+     db
      pull-pattern)
 
 ;; Note that datomic added the :reg/course+semester+student attribute
 
 ;; Now unregister by retracting the parts of the tuple
-(def db-3 (-> (let [reg-id (->> (d/q '[:find ?e
-                                       :where [?e :reg/course+semester+student]]
-                                     db-2)
-                                ffirst)]
-                (d/with db-2 {:tx-data
-                              [[:db/retract reg-id :reg/course [:course/id "BIO-101"]]
-                               [:db/retract reg-id :reg/semester [:semester/year+season [2018 :fall]]]
-                               [:db/retract reg-id :reg/student [:student/email "johndoe@university.edu"]]]}))
-              :db-after))
+(let [reg-id (->> (d/q '[:find ?e
+                         :where [?e :reg/course+semester+student]]
+                       db)
+                  ffirst)]
+     (d/transact conn {:tx-data
+                       [[:db/retract reg-id :reg/course [:course/id "BIO-101"]]
+                        [:db/retract reg-id :reg/semester [:semester/year+season [2018 :fall]]]
+                        [:db/retract reg-id :reg/student [:student/email "johndoe@university.edu"]]]}))
 
-;; retracting all of the parts also causes the Datomic to retract the composite
+;; retracting all of the parts also causes Datomic to retract the composite
 (d/q '[:find (pull ?e [*])
        :where [?e :reg/course+semester+student]]
-     db-3)
+     (d/db conn))
 ;; []
