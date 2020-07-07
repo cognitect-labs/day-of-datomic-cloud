@@ -9,13 +9,10 @@
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl]
          '[datomic.samples.schema :as schema])
-(import '(java.util UUID))
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "trust"})
+(def conn (d/connect client {:db-name "trust"}))
 
 (def schema-map (read-string (slurp (repl/resource "day-of-datomic-cloud/schema.edn"))))
 (schema/ensure-schemas conn :day-of-datomic/schema schema-map :day-of-datomic/provenance)
@@ -49,5 +46,3 @@
        [?tx :source/confidence ?conf]
        [(<= 90 ?conf)]]
      db)
-
-(d/delete-database client {:db-name db-name})
