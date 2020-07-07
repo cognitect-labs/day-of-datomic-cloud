@@ -6,28 +6,13 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
 
 ;; inspired by http://docs.neo4j.org/chunked/stable/cypher-cookbook-hyperedges.html
 
-;; Define the configuration for your client:
-(def client-cfg (read-string (slurp "config.edn")))
-
-;; Create a client:
-(def client (d/client client-cfg))
-
-;; Create a name for your database:
-(def db-name (str "graph-" (UUID/randomUUID)))
-
-;; Create a new database:
-(d/create-database client {:db-name db-name})
-
-;; Connect to your new database:
-(def conn (d/connect client {:db-name db-name}))
-
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/graph.edn"))
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "graph"}))
 
 (def db (d/db conn))
 
@@ -66,5 +51,3 @@
        :where (user-roles-in-groups ?user1 ?role ?group)
        (user-roles-in-groups ?user2 ?role ?group)]
      db rules [:user/name "User1"] [:user/name "User2"])
-
-(d/delete-database client {:db-name db-name})
