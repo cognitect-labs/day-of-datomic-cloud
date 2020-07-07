@@ -5,11 +5,9 @@
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
+(require '[datomic.client.api :as d])
 
 (def client (d/client {:server-type :dev-local :system "datomic-samples"}))
-(d/create-database client {:db-name "decomposing-a-query"})
 (def conn (d/connect client {:db-name "decomposing-a-query"}))
 
 (def db (d/db conn))
@@ -93,4 +91,4 @@
                :in $ ?e1
                :where [?e2 :a ?e1]]
       :args [db e]
-      :timeout 10000}))
+      :timeout 10000})
