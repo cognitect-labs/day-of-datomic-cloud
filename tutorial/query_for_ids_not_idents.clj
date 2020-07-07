@@ -6,15 +6,12 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
+(import 'java.util.UUID)
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "query-for-ids"})
+(def conn (d/connect client {:db-name "query-for-ids"}))
 
 (set! *print-length* 10)
 
@@ -46,5 +43,3 @@
                :where [?item :item/color ?color]
                [?color :db/ident :color/green]]
              db)))
-
-(d/delete-database client {:db-name db-name})
