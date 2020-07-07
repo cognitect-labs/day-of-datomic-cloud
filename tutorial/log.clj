@@ -6,17 +6,11 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
-(repl/transact-all conn (repl/resource "day-of-datomic-cloud/streets.edn"))
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "streets"}))
 
 (def db (d/db conn))
 
@@ -65,5 +59,3 @@
        :e))
 
 (d/pull db '[*] ent-id)
-
-(d/delete-database client {:db-name db-name})
