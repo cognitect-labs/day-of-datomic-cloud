@@ -12,13 +12,10 @@
 (require
   '[datomic.client.api :as d]
   '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "entity-specs"})
+(def conn (d/connect client {:db-name "entity-specs"}))
 
 (def schema [{:db/ident :score/low
               :db/valueType :db.type/long,
@@ -31,24 +28,20 @@
               :db.entity/preds 'datomic.samples.entity-preds/scores-are-ordered?}])
 (d/transact conn {:tx-data schema})
 
-(def db (d/db conn))
-
 ;; valid scores
-(d/with (d/with-db conn) {:tx-data [{:score/low 10
-                                     :score/high 75
-                                     :db/ensure :team/score}]})
+(d/transact conn {:tx-data [{:score/low 10
+                             :score/high 75
+                             :db/ensure :team/score}]})
 
 ;; not valid - must have low and high score
-(-> (d/with (d/with-db conn) {:tx-data [{:db/id "my-score"
-                                         :score/low 10
-                                         :db/ensure :team/score}]})
+(-> (d/transact conn {:tx-data [{:db/id "my-score"
+                                 :score/low 10
+                                 :db/ensure :team/score}]})
     repl/thrown-data)
 
 ;; not valid - scores must match predicate
-(-> (d/with (d/with-db conn) {:tx-data [{:db/id "my-score"
-                                         :score/low 100
-                                         :score/high 20
-                                         :db/ensure :team/score}]})
+(-> (d/transact conn {:tx-data [{:db/id "my-score"
+                                 :score/low 100
+                                 :score/high 20
+                                 :db/ensure :team/score}]})
     repl/thrown-data)
-
-(d/delete-database client {:db-name db-name})
