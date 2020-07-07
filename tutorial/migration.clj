@@ -9,13 +9,10 @@
 (require '[datomic.client.api :as d]
          '[datomic.samples.repl :as repl]
          '[datomic.samples.schema :as schema])
-(import '(java.util UUID))
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
+(d/create-database client {:db-name "migration"})
+(def conn (d/connect client {:db-name "migration"}))
 
 (def schema-map (-> (repl/resource "day-of-datomic-cloud/schema.edn")
                     slurp read-string))
@@ -33,5 +30,3 @@
 ;; and we have the social-news attributes, because provenance
 ;; depended on them
 (schema/has-attribute? db :story/title)
-
-(d/delete-database client {:db-name db-name})
