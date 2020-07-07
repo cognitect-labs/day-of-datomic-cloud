@@ -1,0 +1,42 @@
+;   Copyright (c) Cognitect, Inc. All rights reserved.
+;   The use and distribution terms for this software are covered by the
+;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;   which can be found in the file epl-v10.html at the root of this distribution.
+;   By using this software in any fashion, you are agreeing to be bound by
+;   the terms of this license.
+;   You must not remove this notice, or any other, from this software.
+
+(require '[datomic.client.api :as d])
+
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(d/create-database client {:db-name "friends"})
+(def conn (d/connect client {:db-name "friends"}))
+
+;; define a schema of person entities where each person has a name and friends.
+;; -- note that the friends are intended to be person entities themselves.
+(def schema-tx
+  [{:db/ident :person/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :person/friend
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
+
+(d/transact conn {:tx-data schema-tx})
+
+;; transact some people who have some friends.
+(let [people-tx
+      [{:db/id "anne-id"
+        :person/name "anne"
+        :person/friend #{"bob-id" "james-id"}}
+       {:db/id "bob-id"
+        :person/name "bob"
+        :person/friend #{"anne-id" "lucille-id"}}
+       {:db/id "james-id"
+        :person/name "james"
+        :person/friend #{"anne-id" "lucille-id"}}
+       {:db/id "lucille-id"
+        :person/name "lucille"
+        :person/friend #{"bob-id"}}]]
+  (d/transact conn {:tx-data people-tx}))

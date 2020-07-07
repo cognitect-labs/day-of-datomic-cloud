@@ -5,43 +5,10 @@
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
-(require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
-(import '(java.util UUID))
+(require '[datomic.client.api :as d])
 
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name (str "scratch-" (UUID/randomUUID)))
-(d/create-database client {:db-name db-name})
-(def conn (d/connect client {:db-name db-name}))
-
-;; define a schema of person entities where each person has a name and friends.
-;; -- note that the friends are intended to be person entities themselves.
-(def schema-tx
-  [{:db/ident :person/name
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :person/friend
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many}])
-
-(d/transact conn {:tx-data schema-tx})
-
-;; transact some people who have some friends.
-(let [people-tx
-      [{:db/id "anne-id"
-        :person/name "anne"
-        :person/friend #{"bob-id" "james-id"}}
-       {:db/id "bob-id"
-        :person/name "bob"
-        :person/friend #{"anne-id" "lucille-id"}}
-       {:db/id "james-id"
-        :person/name "james"
-        :person/friend #{"anne-id" "lucille-id"}}
-       {:db/id "lucille-id"
-        :person/name "lucille"
-        :person/friend #{"bob-id"}}]]
-  (d/transact conn {:tx-data people-tx}))
+(def client (d/client {:server-type :dev-local :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "friends"}))
 
 (def db (d/db conn))
 
@@ -63,5 +30,3 @@
 ;; we can also traverse the graph in reverse (reverse ref in pull pattern)
 (d/pull db '[:person/name {[:person/_friend :as :pals] 1}] anne-id)
 (d/pull db '[:person/name {[:person/_friend :as :pals] ...}] anne-id)
-
-(d/delete-database client {:db-name db-name})
