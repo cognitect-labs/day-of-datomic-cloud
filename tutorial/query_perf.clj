@@ -6,14 +6,10 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-;; Install sample data per https://github.com/Datomic/mbrainz-import
-
-;; get connected
 (require '[datomic.client.api :as d])
-(def client-cfg (read-string (slurp "config.edn")))
-(def client (d/client client-cfg))
-(def db-name "mbrainz-1968-1973")
-(def conn (d/connect client {:db-name db-name}))
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "mbrainz-subset"}))
 (def db (d/db conn))
 (set! *print-length* 100)
 

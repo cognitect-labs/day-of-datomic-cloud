@@ -93,5 +93,4 @@
                :in $ ?e1
                :where [?e2 :a ?e1]]
       :args [db e]
-      :timeout 10000})
-
+      :timeout 10000}))

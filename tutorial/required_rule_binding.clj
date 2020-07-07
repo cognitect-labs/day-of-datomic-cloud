@@ -6,17 +6,14 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-;; sample data at https://github.com/Datomic/mbrainz-importer
-
 (require '[datomic.client.api :as d])
 
-(def client-cfg (read-string (slurp "config.edn")))
+(def client (d/client {:server-type :dev-local
+                       :system "datomic-samples"}))
+(def conn (d/connect client {:db-name "mbrainz-subset"}))
 
-(def client (d/client client-cfg))
-(def db-name "mbrainz-1968-1973")
-(def conn (d/connect client {:db-name db-name}))
 (d/db-stats (d/db conn))
-;; {:datoms 1101457}
+;; {:datoms 800958}
 
 (def rules '[[(created-at ?eid ?created-at)
               [?eid :artist/gid _ ?tx]
@@ -36,20 +33,19 @@
              rules
              "John Lennon")))
 
-;"Elapsed time: 141.830006 msecs"
-;"Elapsed time: 106.182582 msecs"
-;"Elapsed time: 153.978252 msecs"
-;"Elapsed time: 152.049875 msecs"
-;"Elapsed time: 101.1425 msecs"
-;"Elapsed time: 111.393335 msecs"
-;"Elapsed time: 97.178747 msecs"
-;"Elapsed time: 115.192522 msecs"
-;"Elapsed time: 107.059504 msecs"
-;"Elapsed time: 100.019785 msecs"
-
+;"Elapsed time: 795.416999 msecs"
+;"Elapsed time: 509.75383 msecs"
+;"Elapsed time: 552.461563 msecs"
+;"Elapsed time: 521.160344 msecs"
+;"Elapsed time: 492.732056 msecs"
+;"Elapsed time: 481.658969 msecs"
+;"Elapsed time: 518.658198 msecs"
+;"Elapsed time: 458.666145 msecs"
+;"Elapsed time: 469.069394 msecs"
+;"Elapsed time: 493.37032 msecs"
 
 ; Binding the ?e input to the rule prior to invoking it
-; results in a ~5x speed up:
+; results in a ~100x speed up:
 
 (dotimes [_ 10]
   (time (d/q '[:find (count ?modified-at) ?created-at
@@ -62,16 +58,16 @@
              rules
              "John Lennon")))
 
-;"Elapsed time: 65.252007 msecs"
-;"Elapsed time: 32.437732 msecs"
-;"Elapsed time: 26.300127 msecs"
-;"Elapsed time: 33.456768 msecs"
-;"Elapsed time: 32.137735 msecs"
-;"Elapsed time: 25.241188 msecs"
-;"Elapsed time: 32.067527 msecs"
-;"Elapsed time: 26.093559 msecs"
-;"Elapsed time: 25.86028 msecs"
-;"Elapsed time: 27.734526 msecs"
+;"Elapsed time: 7.271642 msecs"
+;"Elapsed time: 4.714193 msecs"
+;"Elapsed time: 4.201005 msecs"
+;"Elapsed time: 4.362768 msecs"
+;"Elapsed time: 4.217789 msecs"
+;"Elapsed time: 4.19738 msecs"
+;"Elapsed time: 4.170306 msecs"
+;"Elapsed time: 4.106451 msecs"
+;"Elapsed time: 4.383799 msecs"
+;"Elapsed time: 4.013269 msecs"
 
 ; Specifying that ?eid must be bound in the rule head
 ; provides the same performance advantage, independent
@@ -97,13 +93,13 @@
              rules-req-bindings
              "John Lennon")))
 
-;"Elapsed time: 66.176336 msecs"
-;"Elapsed time: 33.042925 msecs"
-;"Elapsed time: 27.7784 msecs"
-;"Elapsed time: 38.535327 msecs"
-;"Elapsed time: 45.482539 msecs"
-;"Elapsed time: 39.341726 msecs"
-;"Elapsed time: 31.054759 msecs"
-;"Elapsed time: 33.234804 msecs"
-;"Elapsed time: 31.42365 msecs"
-;"Elapsed time: 33.532647 msecs"
+;"Elapsed time: 5.644502 msecs"
+;"Elapsed time: 3.928514 msecs"
+;"Elapsed time: 4.252462 msecs"
+;"Elapsed time: 3.934261 msecs"
+;"Elapsed time: 3.884296 msecs"
+;"Elapsed time: 3.689085 msecs"
+;"Elapsed time: 3.622701 msecs"
+;"Elapsed time: 3.824715 msecs"
+;"Elapsed time: 4.050259 msecs"
+;"Elapsed time: 3.88406 msecs"

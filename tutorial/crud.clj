@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl])
+         '[clojure.pprint :as pp])
 
 (def client (d/client {:server-type :dev-local :system "day-of-datomic-cloud"}))
 (d/create-database client {:db-name "crud"})
@@ -52,7 +52,7 @@
 
 ;; but everything ever said is still there
 (def history (d/history db-after-delete))
-(require '[clojure.pprint :as pp])
+
 (->> (d/q '[:find ?e ?a ?v ?tx ?op
             :in $
             :where [?e :crud/name "Hello world"]

@@ -1,5 +1,4 @@
 (require '[datomic.client.api :as d]
-         '[datomic.samples.repl :as repl]
          '[clojure.data.csv :as csv]
          '[clojure.edn :as edn]
          '[clojure.java.io :as io])
@@ -42,5 +41,4 @@
 (d/q '[:find (pull ?e [[:inv/sku :as "sku"]
                        [:inv/count :as "count" :default 0]])
        :where [?e :inv/sku ?sku]]
-     db)
-
+     db))
