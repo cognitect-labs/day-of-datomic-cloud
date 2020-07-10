@@ -1,7 +1,7 @@
 # day-of-datomic-cloud
 
 Day of Datomic Cloud project is a collection of samples and tutorials
-for learning [Datomic Cloud](http://datomic.com) at a Clojure REPL.
+for learning [Datomic Cloud](https://www.datomic.com) at a Clojure REPL.
 
 ## Getting Started
 
@@ -10,13 +10,9 @@ for learning [Datomic Cloud](http://datomic.com) at a Clojure REPL.
 $ brew install clojure
 ```
 
-* [Create a Datomic Cloud System](https://docs.datomic.com/cloud/getting-started/getting-started.html).
+* [Install Datomic dev-local](https://docs.datomic.com/cloud/dev-local.html).
 
-* Clone this repo locally
-
-* Copy config.edn.example to config.edn and edit config.edn, providing your Datomic Cloud connection [configuration information](https://docs.datomic.com/cloud/getting-started/connecting.html#creating-database).
-
-* Make sure you are running a [SOCKS Proxy](https://docs.datomic.com/cloud/getting-started/configuring-access.html#socks-proxy) to your Datomic Cloud Bastion.
+* [Install the datomic-samples databases](https://docs.datomic.com/cloud/examples.html#datomic-samples).
 
 * Start a Clojure REPL in the day-of-datomic-cloud directory:
 ```
@@ -42,10 +38,10 @@ the helper functions in src/datomic/samples.
 For specific feedback on the tutorials, please create an
 [issue](https://github.com/cognitect-labs/day-of-datomic-cloud/issues).
 
-For questions about Datomic, try the [public discussion forum](http://forum.datomic.com/).
+For questions about Datomic, try the [public discussion forum](https://forum.datomic.com/).
 
 ## License
 
-Copyright © 2017 Cognitect, Inc.
+Copyright © Cognitect, Inc.
 
 Licensed under the Eclipse Public License (EPL) v1.0
