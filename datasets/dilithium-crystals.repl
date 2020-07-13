@@ -18,23 +18,19 @@
      :db/ident :item/id
      :db/valueType :db.type/string
      :db/cardinality :db.cardinality/one
-     :db/unique :db.unique/identity
-     :db.install/_attribute :db.part/db}
+     :db/unique :db.unique/identity}
     {:db/id "item/description"
      :db/ident :item/description
      :db/valueType :db.type/string
-     :db/cardinality :db.cardinality/one
-     :db.install/_attribute :db.part/db}
+     :db/cardinality :db.cardinality/one}
     {:db/id "item/count"
      :db/ident :item/count
      :db/valueType :db.type/long
-     :db/cardinality :db.cardinality/one
-     :db.install/_attribute :db.part/db}
+     :db/cardinality :db.cardinality/one}
     {:db/id "tx/error"
      :db/ident :tx/error
      :db/valueType :db.type/boolean
-     :db/cardinality :db.cardinality/one
-     :db.install/_attribute :db.part/db}
+     :db/cardinality :db.cardinality/one}
     {:db/txInstant #inst "2012"}]
    [{:db/id "DLC-042"
      :item/id "DLC-042"
