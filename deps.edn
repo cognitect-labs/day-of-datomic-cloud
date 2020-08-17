@@ -10,6 +10,6 @@
  :mvn/repos {"datomic-cloud" {:url "s3://datomic-releases-1fc2183a/maven/releases"}}
  :aliases
  {;; edit this if you're using a newer version of REBL
-  :rebl  {:extra-deps {rebl {:local/root "REBL-0.9.220.jar"}}}
+  :rebl  {:extra-deps {com.cognitect/rebl {:local/root "REBL-0.9.220.jar"}}}
   ;; See https://github.com/cognitect-labs/REBL-distro/wiki/REBL-and-nREPL
   :nREPL {:extra-deps {nrepl/nrepl {:mvn/version "0.6.0"}}}}}
