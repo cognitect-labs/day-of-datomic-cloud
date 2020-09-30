@@ -16,7 +16,7 @@ $ brew install clojure/tools/clojure
 
 * Clone this repo 
 ```
-git clone git@github.com:cognitect-labs/day-of-datomic-cloud.git
+$ git clone git@github.com:cognitect-labs/day-of-datomic-cloud.git
 ```
 
 * Start a Clojure REPL in the day-of-datomic-cloud directory:
