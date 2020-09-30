@@ -7,12 +7,17 @@ for learning [Datomic Cloud](https://www.datomic.com) at a Clojure REPL.
 
 * Install Clojure:
 ```
-$ brew install clojure
+$ brew install clojure/tools/clojure
 ```
 
 * [Install Datomic dev-local](https://docs.datomic.com/cloud/dev-local.html).
 
 * [Install the datomic-samples databases](https://docs.datomic.com/cloud/examples.html#datomic-samples).
+
+* Clone this repo 
+```
+git clone git@github.com:cognitect-labs/day-of-datomic-cloud.git
+```
 
 * Start a Clojure REPL in the day-of-datomic-cloud directory:
 ```
