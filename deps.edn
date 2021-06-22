@@ -4,7 +4,7 @@
   org.clojure/data.generators {:mvn/version "0.1.2"}
   org.clojure/clojure {:mvn/version "1.10.1"}
   com.datomic/client-cloud {:mvn/version "0.8.96"}
-  com.datomic/dev-local {:mvn/version "0.9.172"}
+  com.datomic/dev-local {:mvn/version "0.9.232"}
   seesaw/seesaw {:mvn/version "1.4.5"}}
  :paths ["src" "tutorial" "doc-examples" "resources"]
  :mvn/repos {"datomic-cloud" {:url "s3://datomic-releases-1fc2183a/maven/releases"}}
